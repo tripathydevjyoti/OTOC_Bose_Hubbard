@@ -4,8 +4,6 @@ using LightGraphs #might be ueful later for finding nearest neighbour on hex lat
 using GraphPlot
 using SparseArrays: sparse
 
-
-
 function sparse_hamiltonian(basis::AbstractSzbasis)
     rows=Int64[]
     cols=Int64[]
@@ -36,14 +34,14 @@ function sparse_hamiltonian(basis::AbstractSzbasis)
                         push!(cols, serial_num(basis,ket))
                         push!(elements, -t*sqrt(bra[site1])*sqrt(bra[site2]+1))
                     end
-                end         
+                end
             end
         end
-    end  
-    
+    end
+
     sparse(rows,cols,elements,length(basis),length(basis))
 
-end 
+end
 
 
 L = 6 #number of sites in the lattice
@@ -52,10 +50,3 @@ basis=Szbasis(L,N)
 const U=16
 const t=4
 H = sparse_hamiltonian(basis)
-
-
-
-
-
-
-
