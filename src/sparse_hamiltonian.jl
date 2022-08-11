@@ -57,7 +57,7 @@ H2 = sparse_hamiltonian(basis2)
 H3 = sparse_hamiltonian(basis3)
 
 
-function time_evoultion(
+function time_evolution(
     Eₙ::Array{T, 1},
     ψₙ::Array{T, 2},
     ψ₀::Array{Complex{T}, 1},
