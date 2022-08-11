@@ -57,6 +57,17 @@ H2 = sparse_hamiltonian(basis2)
 H3 = sparse_hamiltonian(basis3)
 
 
+function time_evoultion(
+    Eₙ::Array{T, 1},
+    ψₙ::Array{T, 2},
+    ψ₀::Array{Complex{T}, 1},
+    t::T
+) where T <: Real
+    cₙ = dot.(conj.(ψ₀), ψₙ)
+    eₙ = exp.(-1im .* Eₙ .* t)
+    sum(eₙ .* cₙ .* ψₙ, dims=2)
+end
+
 
 function time_evoultion(eig_vals,eig_vecs,init_state,time)
     coeff_list = Float64[]
@@ -67,7 +78,6 @@ function time_evoultion(eig_vals,eig_vecs,init_state,time)
         out_vec = out_vec + coeff*eig_vecs[i]
     end
     return out_vec
-
 end
 
 function superposition(inp_vec)
@@ -83,7 +93,7 @@ function superposition(inp_vec)
         track[i]=0
     end
     return ket_list,coeff_list
-end             
+end
 
 
 
@@ -103,13 +113,13 @@ function find_index(inp_state,basis)
             index =i
         end
     end
-    return index 
-end           
+    return index
+end
 
 
 function OTOC(site1,site2,time)
     init_state1=[1,1,1,1,1,1]
-    
+
     init_state = destroy(init_state1,site1)
 
     for i in 1:len(basis2)
@@ -117,17 +127,17 @@ function OTOC(site1,site2,time)
             index = i
         end
     end
-    
+
     track = zeros(length(basis2))
     track[index]=1
-    
+
     new_state = time_evoultion(E2,V2,track,time)
-    
+
     superpos_coeff,superpos_state = superposition(new_state)
 
     new_state = zeros(length(basis3))
     for i in 1:length(superpos_state)
-        
+
         superpos_state[i] = destroy[superpos_state[i],site2]
 
         track = zeros(length(basis3))
@@ -137,12 +147,12 @@ function OTOC(site1,site2,time)
     end
 
     new_state = time_evoultion(E3,V3,new_state,-time)
-    
+
     superpos_coeff,superpos_state = superposition(new_state)
 
     new_state = zeros(length(basis2))
     for i in 1:length(superpos_state)
-        
+
         superpos_state[i] = create[superpos_state[i],site1]
 
         track = zeros(length(basis2))
@@ -157,7 +167,7 @@ function OTOC(site1,site2,time)
 
     new_state = zeros(length(basis1))
     for i in 1:length(superpos_state)
-        
+
         superpos_state[i] = create[superpos_state[i],site2]
 
         track = zeros(length(basis1))
@@ -174,20 +184,3 @@ function OTOC(site1,site2,time)
     return vecdot(track,fin_state)
 
 end
-
-
-
-
-
-
-
-    
-    
-
-
-
-
-
-
-    
-
