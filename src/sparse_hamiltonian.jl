@@ -3,6 +3,7 @@ using JeszenszkiBasis
 using LightGraphs #might be ueful later for finding nearest neighbour on hex lattice
 using GraphPlot
 using SparseArrays: sparse
+using DocStringExtensions
 
 function sparse_hamiltonian(basis::AbstractSzbasis)
     rows=Int64[]
@@ -68,7 +69,7 @@ function time_evolution(
     sum(eₙ .* cₙ .* ψₙ, dims=2)
 end
 
-
+ """  
 function time_evoultion(eig_vals,eig_vecs,init_state,time)
     coeff_list = Float64[]
     out_vec = zeros(length(init_state))
@@ -79,108 +80,142 @@ function time_evoultion(eig_vals,eig_vecs,init_state,time)
     end
     return out_vec
 end
-
-function superposition(inp_vec)
-    ket_list=[]
-    coeff_list=[]
-    track = zeros(len(inp_vec))
-    for i in 1:len(inp_vec)
-        track[i]=1
-        if vecdot(track,inp_vec)>0.001
-            push!(ket_list,basis[i])
-            push!(coeff_list,vecdot(inp_vec))
+"""
+function superposition(
+    Ψ::Array{Complex{T},1},
+    basis::Array{Int64,1}
+) where T <: Real
+    Ψₙ = Int64[]
+    β = Complex[]
+    
+    for i in 1:length(Ψ)
+        
+        Cₙ = abs(Ψ[i])
+        if Cₙ>0.001
+            push!(Ψₙ,basis[i])
+            push!(β,Cₙ)
         end
-        track[i]=0
+        
     end
-    return ket_list,coeff_list
+    return β,Ψₙ
 end
 
 
 
-function create(ket,i)
+function create(
+    ket::Array{Int64,1},
+    i::Int64
+    )
+    
     ket[i] = ket[i]+1
     return ket
 end
 
-function destroy(ket,i)
+function destroy(
+    ket::Array{Int64,1},
+    i::Int64
+    )
+    
     ket[i] = ket[i]-1
     return ket
 end
 
-function find_index(inp_state,basis)
+function find_index(
+    input_state::Array{Int64,1},
+    basis::Array{int64,1}
+    )
+    index=0
+    
     for i in 1:length(basis)
         if inp_state == basis[i]
             index =i
+            break
         end
+
     end
+    
+
     return index
 end
 
+#find_index([5,1,0,0,0,0],basis1)
 
-function OTOC(site1,site2,time)
-    init_state1=[1,1,1,1,1,1]
+function big_destroy(
+    Cₙ::Array{Complex{T},1},
+    Ψin::Array{Int64,2},
+    basis::Array{Int64,1},
+    site::Int64
+)
+    Ψout = zeros(length(basis))
 
-    init_state = destroy(init_state1,site1)
-
-    for i in 1:len(basis2)
-        if init_state == basis2[i]
-            index = i
-        end
+    for i in 1:length(Ψin)
+        Ψin[i] = destroy( Ψin[i] , site)
+        
+        track = zeros(length(basis))
+        index = find_index(Ψin[i],basis)
+        track[index]=1
+        
+        Ψout = Ψout + Cₙ[i]*track
     end
+    return Ψout
+end    
 
+function big_create(
+    Cₙ::Array{Complex{T},1},
+    Ψin::Array{Int64,2},
+    basis::Array{Int64,1},
+    site::Int64
+)
+    Ψout = zeros(length(basis))
+
+    for i in 1:length(Ψin)
+        Ψin[i] = create( Ψin[i] , site)
+        track = zeros(length(basis))
+        index = find_index(Ψin[i],basis)
+        track[index]=1
+        Ψout = Ψout + Cₙ[i]*track
+    end
+    return Ψout
+end        
+
+        
+     
+
+
+function OTOC(
+    site1::Int64,
+    site2::Int64,
+    time::Real)
+    
+     Ψ₀=[1,1,1,1,1,1]
+
+     Ψ₁ = destroy(Ψ₀,site1)
+
+    index::Int64 = find_index(Ψ₁,basis2)
     track = zeros(length(basis2))
     track[index]=1
 
-    new_state = time_evoultion(E2,V2,track,time)
+    Ψ₂ = time_evolution(E2,V2,track,time)
 
-    superpos_coeff,superpos_state = superposition(new_state)
+    cₙ,ψₙ = superposition(Ψ₂,basis2)
+    Ψ₃ = big_destroy(cₙ,ψₙ,basis3,site2)
 
-    new_state = zeros(length(basis3))
-    for i in 1:length(superpos_state)
+    Ψ₄ = time_evolution(E3,V3,Ψ₃,-time)
 
-        superpos_state[i] = destroy[superpos_state[i],site2]
+    cₙ,ψₙ = superposition(Ψ₄,basis3)
+    Ψ₅ = big_create(cₙ,ψₙ,basis2,site1)
 
-        track = zeros(length(basis3))
-        index = find_index(superpos_state[i],basis3)
-        track[index]=1
-        new_state = new_state + superpos_coeff[i]*track
-    end
+    Ψ₆ = time_evolution(E2,V2,Ψ₅,time)
 
-    new_state = time_evoultion(E3,V3,new_state,-time)
+    cₙ,ψₙ = superposition(Ψ₆,basis2) 
+    Ψ₇ = big_create(cₙ,ψₙ,basis1,site2)
 
-    superpos_coeff,superpos_state = superposition(new_state)
+    Ψ_fin = time_evolution(E1,V1,Ψ₇,-time)
 
-    new_state = zeros(length(basis2))
-    for i in 1:length(superpos_state)
-
-        superpos_state[i] = create[superpos_state[i],site1]
-
-        track = zeros(length(basis2))
-        index = find_index(superpos_state[i],basis2)
-        track[index]=1
-        new_state = new_state + superpos_coeff[i]*track
-    end
-
-    new_state = time_evolution(E2,V2,new_state,time)
-
-    superpos_coeff,superpos_state = superposition(new_state)
-
-    new_state = zeros(length(basis1))
-    for i in 1:length(superpos_state)
-
-        superpos_state[i] = create[superpos_state[i],site2]
-
-        track = zeros(length(basis1))
-        index = find_index(superpos_state[i],basis1)
-        track[index]=1
-        new_state = new_state + superpos_coeff[i]*track
-    end
-
-    fin_state = time_evolution(E1,V1,new_state,-time)
-
-    track=zeros(length(basis1))
+    
     index = find_index(init_state1,basis1)
-    track[index] = 1
-    return vecdot(track,fin_state)
+    
+    
+    return abs(Ψ_fin[index])
 
 end
