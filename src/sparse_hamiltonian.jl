@@ -44,7 +44,7 @@ function sparse_hamiltonian(basis::AbstractSzbasis)
 
 end
 
-
+"""
 L = 6 #number of sites in the lattice
 N = 6 #number of bosons in the lattice
 basis1=Szbasis(L,N)
@@ -56,7 +56,7 @@ const t=4
 H1 = sparse_hamiltonian(basis1)
 H2 = sparse_hamiltonian(basis2)
 H3 = sparse_hamiltonian(basis3)
-
+"""
 
 function time_evolution(
     Eₙ::Array{T, 1},
@@ -69,21 +69,10 @@ function time_evolution(
     sum(eₙ .* cₙ .* ψₙ, dims=2)
 end
 
- """  
-function time_evoultion(eig_vals,eig_vecs,init_state,time)
-    coeff_list = Float64[]
-    out_vec = zeros(length(init_state))
-    for i in 1:length(eig_vals)
-        conj_vec = conj!(eig_vec[i])
-        coeff = exp(-1im*eig_vals[i]*time)* ( vecdot(conj_vec,init_state) )
-        out_vec = out_vec + coeff*eig_vecs[i]
-    end
-    return out_vec
-end
-"""
+
 function superposition(
-    Ψ::Array{Complex{T},1},
-    basis::Array{Int64,1}
+    Ψ::Array{Complex{T}, 1},
+    basis::Array{Int64, 1}
 ) where T <: Real
     Ψₙ = Int64[]
     β = Complex[]
@@ -106,22 +95,22 @@ function create(
     ket::Array{Int64,1},
     i::Int64
     )
-    
-    ket[i] = ket[i]+1
-    return ket
+    nket = copy(ket)
+    nket[i] += 1
+    return nket
 end
 
 function destroy(
     ket::Array{Int64,1},
     i::Int64
     )
-    
-    ket[i] = ket[i]-1
-    return ket
+    nket = copy(ket)
+    nket[i] -= 1
+    return nket
 end
 
 function find_index(
-    input_state::Array{Int64,1},
+    inp_state::Array{Int64,1},
     basis::Array{int64,1}
     )
     index=0
@@ -139,23 +128,21 @@ function find_index(
 end
 
 #find_index([5,1,0,0,0,0],basis1)
+   
 
 function big_destroy(
     Cₙ::Array{Complex{T},1},
     Ψin::Array{Int64,2},
     basis::Array{Int64,1},
     site::Int64
-)
+) where T <:Real
+    
     Ψout = zeros(length(basis))
 
-    for i in 1:length(Ψin)
-        Ψin[i] = destroy( Ψin[i] , site)
-        
-        track = zeros(length(basis))
-        index = find_index(Ψin[i],basis)
-        track[index]=1
-        
-        Ψout = Ψout + Cₙ[i]*track
+    for (i,ϕ) in enumerate(Ψin)
+        ϕ = destroy( ϕ , site)
+        index = find_index(ϕ,basis)
+        Ψout[index] = Cₙ[i]
     end
     return Ψout
 end    
@@ -165,15 +152,14 @@ function big_create(
     Ψin::Array{Int64,2},
     basis::Array{Int64,1},
     site::Int64
-)
+) where T <:Real
+
     Ψout = zeros(length(basis))
 
-    for i in 1:length(Ψin)
-        Ψin[i] = create( Ψin[i] , site)
-        track = zeros(length(basis))
-        index = find_index(Ψin[i],basis)
-        track[index]=1
-        Ψout = Ψout + Cₙ[i]*track
+    for (i,ϕ) in enumerate(Ψin)
+        ϕ = create( ϕ , site)
+        index = find_index(ϕ,basis)
+        Ψout[index] = Cₙ[i]
     end
     return Ψout
 end        
