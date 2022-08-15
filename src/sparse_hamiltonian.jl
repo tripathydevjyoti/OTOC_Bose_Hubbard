@@ -44,19 +44,6 @@ function sparse_hamiltonian(basis::AbstractSzbasis)
 
 end
 
-"""
-L = 6 #number of sites in the lattice
-N = 6 #number of bosons in the lattice
-basis1=Szbasis(L,N)
-basis2=Szbasis(L,N-1)
-basis3=Szbasis(L,N-2)
-
-const U=16
-const t=4
-H1 = sparse_hamiltonian(basis1)
-H2 = sparse_hamiltonian(basis2)
-H3 = sparse_hamiltonian(basis3)
-"""
 
 function time_evolution(
     Eₙ::Array{T, 1},

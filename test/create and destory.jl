@@ -21,7 +21,8 @@ end
 
 
 @testset "Checking if functions 'create' and 'destory' are working fine" begin
-
-@test create([5,0,0,0,0,0],1) == [6,0,0,0,0,0]
     
-end 
+    @test create([5,0,0,0,0,0],1) == [6,0,0,0,0,0]
+    @test destroy([6,0,0,0,0,0],1) == [5,0,0,0,0,0]
+end
+    
