@@ -58,8 +58,8 @@ end
 
 
 function superposition(
-    Ψ::Array{Complex{T}, 1},
-    basis::Array{Int64, 1}
+    Ψ::Vector{Complex{T}},
+    basis::AbstractSzbasis
 ) where T <: Real
     Ψₙ = Int64[]
     β = Complex[]
