@@ -19,7 +19,7 @@ function sparse_hamiltonian(basis::AbstractSzbasis)
         push!(rows,i)
         push!(cols,i)
         push!(elements,U*Usum/2)
-
+   
         #off-diagonal entries
 
         for j in 1:L
@@ -58,28 +58,32 @@ end
 
 
 function superposition(
-    Ψ::Vector{Complex{T}},
-    basis::AbstractSzbasis
-) where T <: Real
-    Ψₙ = Int64[]
+    Ψ ::Vector{Complex{T}},
+    basis ::AbstractSzbasis
+)   where T<: Real
+    Ψₙ = []
     β = Complex[]
+
+    Cₙ =broadcast(abs, Ψ)
     
-    for i in 1:length(Ψ)
+    for(i,x) in enumerate(Cₙ)
         
-        Cₙ = abs(Ψ[i])
-        if Cₙ>0.001
+        
+        if x > 0.001
             push!(Ψₙ,basis[i])
-            push!(β,Cₙ)
+            push!(β,Ψ[i])
         end
         
     end
-    return β,Ψₙ
+    
+    return β,Ψₙ 
+    
 end
 
 
 
 function create(
-    ket::Array{Int64,1},
+    ket::AbstractArray{Int64,1},
     i::Int64
     )
     nket = copy(ket)
@@ -88,7 +92,7 @@ function create(
 end
 
 function destroy(
-    ket::Array{Int64,1},
+    ket::AbstractArray{Int64,1},
     i::Int64
     )
     nket = copy(ket)
@@ -118,11 +122,11 @@ end
    
 
 function big_destroy(
-    Cₙ::Array{Complex{T},1},
-    Ψin::Array{Int64,2},
-    basis::Array{Int64,1},
+    Cₙ::Vector{Complex},
+    Ψin ::Vector{AbstractArray{Int64}},
+    basis::AbstractSzbasis,
     site::Int64
-) where T <:Real
+) 
     
     Ψout = zeros(length(basis))
 
@@ -132,14 +136,14 @@ function big_destroy(
         Ψout[index] = Cₙ[i]
     end
     return Ψout
-end    
+end 
 
 function big_create(
-    Cₙ::Array{Complex{T},1},
-    Ψin::Array{Int64,2},
-    basis::Array{Int64,1},
+    Cₙ::Vector{Complex},
+    Ψin::Vector{AbstractArray{Int64}},
+    basis::AbstractSzbasis,
     site::Int64
-) where T <:Real
+) 
 
     Ψout = zeros(length(basis))
 
