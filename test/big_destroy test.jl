@@ -1,12 +1,43 @@
-
-"""
-NOT COMPLETE YET
-
-
-"""
-
 using Test
 using JeszenszkiBasis
+
+function destroy(
+    ket::AbstractArray{Int64,1},
+    i::Int64
+    )
+    nket = copy(ket)
+    nket[i] -= 1
+    return nket
+end
+
+
+function superposition(
+    Ψ ::Vector{Complex{T}},
+    basis ::AbstractSzbasis
+)   where T<: Real
+    
+    Ψₙ = AbstractArray{Int64}[]
+    β = Complex[]
+
+    Cₙ =broadcast(abs, Ψ)
+    
+    for(i,x) in enumerate(Cₙ)
+        
+        
+        if x > 0.001
+            push!(Ψₙ,basis[i])
+            push!(β,Ψ[i])
+        end
+        
+    end
+
+        
+
+
+    
+    return β,Ψₙ 
+    
+end
 
 
 function find_index(
@@ -29,11 +60,11 @@ end
 
 
 function big_destroy(
-    Cₙ::Array{Complex{T},1},
-    Ψin::Array{Int64,1},
+    Cₙ::Vector{Complex},
+    Ψin ::Vector{AbstractArray{Int64}},
     basis::AbstractSzbasis,
     site::Int64
-) where T <:Real
+) 
     
     Ψout = zeros(length(basis))
 
@@ -43,36 +74,24 @@ function big_destroy(
         Ψout[index] = Cₙ[i]
     end
     return Ψout
-end    
+end 
 
 
 
 
-@testset "Checking if Big Create and Destroy are working fine" begin
 
-    c = 1/sqrt(2)
-    coeff_list = Float64[]
-    push!(coeff_list, c)
-    push!(coeff_list, c)
 
-    states_list = Int64[]
-    push!(states_list, [2,0,0])
-    push!(states_list, [1,1,0])
-
+@testset "Checking if big_destroy is working fine" begin
     basis = Szbasis(3,2)
+    Ψ = [1/5, 4/5, 0, 0, 0, 0]
+    Ψ = complex(Ψ)
 
-    print( big_destroy(coeff_list,states_list,basis,1))
-    @test big_destroy(coeff_list,states_list,basis,1) == [c,c,0]
+    coeff_list, states_list = superposition(Ψ, basis)
+
+    basis1 =Szbasis(3,1)
+    
+    @test big_destroy(coeff_list,states_list,basis1,1)   == [0.2, 0.8, 0]
+
+
+    
 end
-
-c = 1/sqrt(2)
-coeff_list = Float64[]
-push!(coeff_list, c)
-push!(coeff_list, c)
-
-basis = Szbasis(3,2)
-states_list = Array{Int64,2}
-typeof(states_list)
-states_list=[ [2,0,0], [1,1,0] ]
-
-print( big_destroy(coeff_list,states_list,basis,1))
