@@ -1,6 +1,6 @@
 export
     lattice,
-    bose_bubbard_1D_obc
+    bose_bubbard_1D
 
     const Instance = Union{String, Dict}
 
@@ -39,10 +39,8 @@ lattice(instance::Instance) = lattice(Float64, instance)
 """
 $(TYPEDSIGNATURES)
 """
-function bose_bubbard_1D_obc(M::Int, J::T, U::T) where T <: Real
-    inst = Dict{NTuple{2, Int}, T}(
-        (i, i+1) => J for i ∈ 1:M-1
-    )
+function bose_bubbard_1D(M::Int, J::T, U::T, ::Val{:OBC}) where T <: Real
+    inst = Dict{NTuple{2, Int}, T}((i, i+1) => J for i ∈ 1:M-1)
     push!(inst, ((i, i) => U for i ∈ 1:M)...)
     lattice(T, inst)
 end

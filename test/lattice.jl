@@ -25,7 +25,7 @@
             @test Ug == U
         end
 
-        bhg_1d = bose_bubbard_1D_obc(M, J, U)
+        bhg_1d = bose_bubbard_1D(M, J, U, Val(:OBC))
 
         @test edges(bhg) == edges(bhg_1d)
         @test nv(bhg) == nv(bhg_1d)

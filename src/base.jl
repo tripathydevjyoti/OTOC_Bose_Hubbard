@@ -77,17 +77,22 @@ function annihilation(::Type{T}, B::Basis, i::Int, ::Val{:dense}) where T <: Rea
 end
 
 annihilation(::Type{T}, B::Basis, i::Int, s::Symbol) where {T} = annihilation(T, B, i, Val(s))
-annihilation(B::Basis, i::Int, s::Symbol) = annihilation(Float64, B::Basis, i::Int, s)
-annihilation(B::Basis, i::Int) = annihilation(B, i, :sparse)
+#annihilation(B::Basis, i::Int, s::Symbol) = annihilation(Float64, B::Basis, i::Int, s)
+#annihilation(B::Basis, i::Int) = annihilation(B, i, :sparse)
 
 """
 $(TYPEDSIGNATURES)
 """
 creation(::Type{T}, B::Basis, i::Int, s::Symbol) where {T} = transpose(annihilation(T, B, i, s))
-creation(B::Basis, i::Int, s::Symbol) = creation(Float64, B::Basis, i::Int, s)
-creation(B::Basis, i::Int) = creation(B, i, :sparse)
+#creation(B::Basis, i::Int, s::Symbol) = creation(Float64, B::Basis, i::Int, s)
+#creation(B::Basis, i::Int) = creation(B, i, :sparse)
 
-# for f \
+
+for f ∈ (:annihilation, :creation)
+    @eval f(B::Basis, i::Int, s::Symbol) = f(Float64, B::Basis, i::Int, s)
+    @eval f(B::Basis, i::Int) = f(B, i, :sparse)
+end
+
 """
 $(TYPEDSIGNATURES)
 """
