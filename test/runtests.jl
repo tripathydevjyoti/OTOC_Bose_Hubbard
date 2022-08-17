@@ -5,8 +5,11 @@ using MetaGraphs
 using Test
 
 my_tests = [
+    "basis.jl",
     "lattice.jl",
-    "model.jl",
+    "conserved_operators.jl",
+    "create_destroy.jl",
+    "hamiltonian.jl",
 ]
 
 for my_test ∈ my_tests
