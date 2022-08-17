@@ -4,12 +4,14 @@ module OTOC_Bose_Hubbard
     using LightGraphs
     using MetaGraphs
     using CSV
-    using KrylvKit
+    using KrylovKit
+    using SparseArrays
+    using Combinatorics
     using DocStringExtensions
     using LinearAlgebra, MKL
 
     include("lattice.jl")
     include("base.jl")
-    include("OTOC.jl")
+    #include("OTOC.jl")
 
 end # modul

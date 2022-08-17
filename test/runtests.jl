@@ -1,4 +1,4 @@
-using OTOC_bose_bubbard
+using OTOC_Bose_Hubbard
 using Test
 
 my_tests = [
