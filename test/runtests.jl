@@ -1,4 +1,7 @@
 using OTOC_Bose_Hubbard
+using LabelledGraphs
+using LightGraphs
+using MetaGraphs
 using Test
 
 my_tests = [
