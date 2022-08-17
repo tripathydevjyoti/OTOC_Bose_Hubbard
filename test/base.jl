@@ -31,30 +31,24 @@ end
 end
 
 @testset "Sparse creation and annihilation operators" begin
-    for i ∈ 1:2, j ∈ 1:1
-        a_i = creation(B, i)
-        ap_j = annihilation(B, j)
+    for i ∈ 1:M, j ∈ 1:M
+        a_i = annihilation(B, i)
+        ap_j = creation(B, j)
 
         @test issparse(a_i)
         @test issparse(ap_j)
         @test size(a_i) == size(ap_j) == (D, D)
         if i == j @test transpose(a_i) == ap_j end
 
-        d_i = creation(B, i, :dense)
-        dp_j = annihilation(B, j, :dense)
+        d_i = annihilation(B, i, :dense)
+        dp_j = creation(B, j, :dense)
 
+        # [a_i^†, a_j^†] == [a_i, a_j] == 0
         @test commutator(d_i, dp_j |> transpose) ≈ zeros(D, D)
-
-        #@test creation(B, i, :dense) == a_i |> Array
-        #@test annihilation(B, j, :dense) == ap_j |> Array
-
-        #@test commutator(b_i, b_j) ≈ zeros(D, D)
-
-        # [a_i^†, a_j^†] == 0
-        #@test commutator(b_i |> transpose, b_j |> transpose) ≈ zeros(D, D)
+        @test commutator(d_i |> transpose, dp_j) ≈ zeros(D, D)
 
         # [a_i, a_j^†] == δ_ij
-        #@test commutator(b_i, b_j |> transpose) ≈ δ(i, j, D)
+        @test commutator(d_i, dp_j) ≈ δ(i, j, D)
     end
 
 end

@@ -66,32 +66,30 @@ function annihilation(::Type{T}, B::Basis, i::Int, ::Val{:dense}) where T <: Rea
     a = zeros(T, n, n)
     eig_vecs = enumerate(B.eig_vecs)
     for (v, ket) ∈ eig_vecs, (w, bra) ∈ eig_vecs
-        if ket[i] > 0
-            for (j, k) ∈ zip(bra, ket)
-                if k != j break end
-            end
-            a[w, v] = sqrt(ket[i])
+        if ket[i] > 0 && bra == operate(ket, i, :destroy)
+            a[v, w] = T(ket[i]) |> sqrt
         end
     end
     a
 end
 
 annihilation(::Type{T}, B::Basis, i::Int, s::Symbol) where {T} = annihilation(T, B, i, Val(s))
-#annihilation(B::Basis, i::Int, s::Symbol) = annihilation(Float64, B::Basis, i::Int, s)
-#annihilation(B::Basis, i::Int) = annihilation(B, i, :sparse)
+annihilation(B::Basis, i::Int, s::Symbol) = annihilation(Float64, B::Basis, i::Int, s)
+annihilation(B::Basis, i::Int) = annihilation(B, i, :sparse)
 
 """
 $(TYPEDSIGNATURES)
 """
 creation(::Type{T}, B::Basis, i::Int, s::Symbol) where {T} = transpose(annihilation(T, B, i, s))
-#creation(B::Basis, i::Int, s::Symbol) = creation(Float64, B::Basis, i::Int, s)
-#creation(B::Basis, i::Int) = creation(B, i, :sparse)
+creation(B::Basis, i::Int, s::Symbol) = creation(Float64, B::Basis, i::Int, s)
+creation(B::Basis, i::Int) = creation(B, i, :sparse)
 
-
+#=
 for f ∈ (:annihilation, :creation)
     @eval f(B::Basis, i::Int, s::Symbol) = f(Float64, B::Basis, i::Int, s)
     @eval f(B::Basis, i::Int) = f(B, i, :sparse)
 end
+=#
 
 """
 $(TYPEDSIGNATURES)
