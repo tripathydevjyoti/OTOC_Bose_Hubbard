@@ -47,7 +47,7 @@ end
 """
 $(TYPEDSIGNATURES)
 """
-function annihilation(::Type{T}, B::Basis, i::Int) where T
+function annihilation(::Type{T}, B::Basis, i::Int, ::Val{:sparse}) where T <: Real
     n = length(B.eig_vecs)
     I, J, V = Int[], Int[], T[]
     for (v, ket) ∈ enumerate(B.eig_vecs)
@@ -60,13 +60,34 @@ function annihilation(::Type{T}, B::Basis, i::Int) where T
     end
     sparse(I, J, V, n, n)
 end
-annihilation(B::Basis, i::Int) = annihilation(Float64, B::Basis, i::Int)
+
+function annihilation(::Type{T}, B::Basis, i::Int, ::Val{:dense}) where T <: Real
+    n = length(B.eig_vecs)
+    a = zeros(T, n, n)
+    eig_vecs = enumerate(B.eig_vecs)
+    for (v, ket) ∈ eig_vecs, (w, bra) ∈ eig_vecs
+        if ket[i] > 0
+            for (j, k) ∈ zip(bra, ket)
+                if k != j break end
+            end
+            a[w, v] = sqrt(ket[i])
+        end
+    end
+    a
+end
+
+annihilation(::Type{T}, B::Basis, i::Int, s::Symbol) where {T} = annihilation(T, B, i, Val(s))
+annihilation(B::Basis, i::Int, s::Symbol) = annihilation(Float64, B::Basis, i::Int, s)
+annihilation(B::Basis, i::Int) = annihilation(B, i, :sparse)
 
 """
 $(TYPEDSIGNATURES)
 """
-creation(B::Basis, i::Int) = transpose(annihilation(B, i))
+creation(::Type{T}, B::Basis, i::Int, s::Symbol) where {T} = transpose(annihilation(T, B, i, s))
+creation(B::Basis, i::Int, s::Symbol) = creation(Float64, B::Basis, i::Int, s)
+creation(B::Basis, i::Int) = creation(B, i, :sparse)
 
+# for f \
 """
 $(TYPEDSIGNATURES)
 """
@@ -98,3 +119,12 @@ function bose_hubbard_hamiltonian(::Type{T}, B::Basis, lattice::LabelledGraph) w
 end
 bose_hubbard_hamiltonian(B::Basis, lattice::LabelledGraph) =
 bose_hubbard_hamiltonian(Float64, B, lattice)
+
+function bose_hubbard_hamiltonian(
+    N::Int, M::Int, J::T, U::T, boundry::Symbol
+ ) where T <: Real
+    bose_hubbard_hamiltonian(
+        Basis(N, M),
+        bose_bubbard_1D(M, J, U, Val(boundry))
+    )
+end
