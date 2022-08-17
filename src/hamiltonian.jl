@@ -20,6 +20,9 @@ struct Basis{T, S}
             A -> [sum(A .== i) for i ∈ 1:N],
             with_replacement_combinations(1:N, M)
         )
+
+       #basis =[[σ...] for σ ∈ Iterators.product(fill(collect(0:N), M)...)] |> vec
+
         tags = tag.(basis)
         order = sortperm(tags)
         new{Int, eltype(tags)}(N, M, tags[order], basis[order])
@@ -50,7 +53,6 @@ end
 
 occupation(::Type{T}, B::Basis, s::Symbol) where {T} = occupation(T, B, Val(s))
 occupation(B::Basis, s::Symbol) = occupation(Float64, B::Basis, s)
-occupation(::Type{T}, B::Basis) where {T} = occupation(T, B, :sparse)
 
 """
 $(TYPEDSIGNATURES)
@@ -76,7 +78,6 @@ end
 
 occupation(::Type{T}, B::Basis, i::Int, s::Symbol) where {T} = occupation(T, B, i, Val(s))
 occupation(B::Basis, i::Int, s::Symbol) = occupation(Float64, B::Basis, i, s)
-occupation(B::Basis, i::Int) = occupation(T, B, i, :sparse)
 
 """
 $(TYPEDSIGNATURES)

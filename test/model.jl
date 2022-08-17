@@ -42,13 +42,11 @@ end
 
 @testset "Sparse occupation operators" begin
     for T ∈ (Float16, Float32, Float64)
-        @test occupation(T, B) == occupation(T, B, :sparse) |> Array
         for i ∈ 1:M
             n_i = occupation(T, B, i, :sparse)
             @test eltype(n_i) == T
             @test isdiag(n_i)
             @test transpose(n_i) == n_i
-            @test n_i == occupation(T, B, i, :sparse) |> Array
         end
     end
 end
@@ -57,6 +55,6 @@ end
     T = Float64
     J = T(1)
     U = T(1/2)
-    H = hamiltonian(M, N, J, U, :OBC)
+    #H = hamiltonian(M, N, J, U, :OBC)
     #@test size(H) = (D, D)
 end
