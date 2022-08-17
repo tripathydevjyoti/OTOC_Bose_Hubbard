@@ -29,6 +29,31 @@ end
     @test destroy_and_create([2, 0, 1], 1, 2) == [1, 1, 1]
 end
 
+@testset "Dense occupation operators" begin
+    for T ∈ (Float16, Float32, Float64)
+        n = occupation(T, B, :dense)
+        @test eltype(n) == T
+        @test isdiag(n)
+        @test transpose(n) == n
+        @test all(diag(n) .== B.N)
+        @test n == sum(occupation(B, i, :dense) for i ∈ 1:M)
+    end
+end
+
+@testset "Sparse occupation operators" begin
+    for T ∈ (Float16, Float32, Float64)
+        @test occupation(T, B) == occupation(T, B, :sparse) |> Array
+        for i ∈ 1:M
+            n_i = occupation(T, B, i, :sparse)
+            @test eltype(n_i) == T
+            @test isdiag(n_i)
+            @test transpose(n_i) == n_i
+            @test n_i == occupation(T, B, i, :sparse) |> Array
+        end
+    end
+end
+
+#=
 @testset "Dense creation and annihilation operators" begin
     for i ∈ 1:M, j ∈ 1:M
         a_i = annihilation(B, i, :dense)
@@ -46,12 +71,15 @@ end
             @test iszero(commutator(a_i, ap_j))
         else
             #@test commutator(a_i, ap_j) == Matrix(1.0 * I, D, D)
+            println(iszero(ap_j))
+            println(iszero(a_i))
+            n_i = occupation(B, i, :dense)
             @test transpose(a_i) == ap_j
+            @test n_i == ap_j * a_i
         end
     end
 end
 
-#=
 @testset "Dense creation and annihilation operators" begin
     for i ∈ 1:M, j ∈ 1:M
         a_i = annihilation(B, i)

@@ -11,7 +11,8 @@ module OTOC_Bose_Hubbard
     using LinearAlgebra, MKL
 
     include("lattice.jl")
-    include("base.jl")
+    include("create_destroy.jl")
+    include("hamiltonian.jl")
     #include("OTOC.jl")
 
 end # modul

@@ -1,7 +1,7 @@
 export
-    Basis, operate,
-    destroy_and_create,
-    creation, annihilation, hamiltonian
+    Basis,
+    occupation,
+    hamiltonian
 
 #tag(v::Vector{Int}) = sum(log.(100 .* collect(1:length(v)) .+ 3) .* v)
 tag(v::Vector{Int}) = hash(v)
@@ -29,61 +29,54 @@ end
 """
 $(TYPEDSIGNATURES)
 """
-function operate(ket::Vector{Int}, i::Int, op::Symbol)
-    @assert op ∈ (:create, :destroy)
-    nket = copy(ket)
-    op == :destroy ? nket[i] -= 1 : nket[i] += 1
-    nket
-end
-
-"""
-$(TYPEDSIGNATURES)
-"""
-function destroy_and_create(ket::Vector{Int}, i::Int, j::Int)
-    operate(operate(ket, i, :destroy), j, :create)
-end
-
-"""
-$(TYPEDSIGNATURES)
-"""
-function annihilation(::Type{T}, B::Basis, i::Int, ::Val{:sparse}) where T <: Real
+function occupation(::Type{T}, B::Basis, ::Val{:dense}) where T <: Real
     n = length(B.eig_vecs)
-    I, J, V = Int[], Int[], T[]
+    N = zeros(T, n, n)
     for (v, ket) ∈ enumerate(B.eig_vecs)
-        if ket[i] > 0
-            push!(J, v)
-            tg = tag(operate(ket, i, :destroy))
-            push!(I, searchsortedfirst(B.tags, tg))
-            push!(V, T(ket[i]) |> sqrt)
-        end
+        N[v, v] = sum(ket)
     end
-    sparse(I, J, V, n, n)
+    N
 end
 
-function annihilation(::Type{T}, B::Basis, i::Int, ::Val{:dense}) where T <: Real
+function occupation(::Type{T}, B::Basis, ::Val{:sparse}) where T <: Real
     n = length(B.eig_vecs)
-    a = zeros(T, n, n)
-    eig_vecs = enumerate(B.eig_vecs)
-    for (v, ket) ∈ eig_vecs, (w, bra) ∈ eig_vecs
-        if ket[i] > 0
-            if bra == operate(ket, i, :destroy)
-                a[w, v] = T(ket[i]) |> sqrt
-            end
-        end
+    I, V = Int[], T[]
+    for (v, ket) ∈ enumerate(B.eig_vecs)
+        push!(I, v)
+        push!(V, sum(ket))
     end
-    a
+    sparse(I, I, V, n, n)
 end
 
-annihilation(::Type{T}, B::Basis, i::Int, s::Symbol) where {T} = annihilation(T, B, i, Val(s))
-annihilation(B::Basis, i::Int, s::Symbol) = annihilation(Float64, B::Basis, i::Int, s)
-annihilation(B::Basis, i::Int) = annihilation(B, i, :sparse)
+occupation(::Type{T}, B::Basis, s::Symbol) where {T} = occupation(T, B, Val(s))
+occupation(B::Basis, s::Symbol) = occupation(Float64, B::Basis, s)
+occupation(::Type{T}, B::Basis) where {T} = occupation(T, B, :sparse)
 
 """
 $(TYPEDSIGNATURES)
 """
-creation(::Type{T}, B::Basis, i::Int, s::Symbol) where {T} = transpose(annihilation(T, B, i, s))
-creation(B::Basis, i::Int, s::Symbol) = creation(Float64, B::Basis, i::Int, s)
-creation(B::Basis, i::Int) = creation(B, i, :sparse)
+function occupation(::Type{T}, B::Basis, i::Int, ::Val{:dense}) where T
+    n = length(B.eig_vecs)
+    N = zeros(T, n, n)
+    for (v, ket) ∈ enumerate(B.eig_vecs)
+        N[v, v] = ket[i]
+    end
+    N
+end
+
+function occupation(::Type{T}, B::Basis, i::Int, ::Val{:sparse}) where T
+    n = length(B.eig_vecs)
+    I, V = Int[], T[]
+    for (v, ket) ∈ enumerate(B.eig_vecs)
+        push!(I, v)
+        push!(V, ket[i])
+    end
+    sparse(I, I, V, n, n)
+end
+
+occupation(::Type{T}, B::Basis, i::Int, s::Symbol) where {T} = occupation(T, B, i, Val(s))
+occupation(B::Basis, i::Int, s::Symbol) = occupation(Float64, B::Basis, i, s)
+occupation(B::Basis, i::Int) = occupation(T, B, i, :sparse)
 
 """
 $(TYPEDSIGNATURES)
@@ -91,14 +84,16 @@ $(TYPEDSIGNATURES)
 function hamiltonian(::Type{T}, B::Basis, lattice::LabelledGraph, ::Val{:sparse}) where T
     n = length(B.eig_vecs)
 
-    # 1. interaction part:
-    I = [collect(1:n)]
-    J = copy(I)
+    I, J, V = Int[], Int[], T[]
     U = get_prop.(Ref(lattice), I, Ref(:U)) ./ 2
-    V = T[sum(U .* ket .* (ket .- 1)) for ket ∈ B.eig_vecs]
+
+    for (v, ket) ∈ enumerate(B.eig_vecs)
+    # 1. interaction part:
+        push!(I, v)
+        push!(J, v)
+        push!(V, sum( U .* ket .* (ket .- 1)))
 
     # 2. kinetic part:
-    for (v, ket) ∈ enumerate(B.eig_vecs)
         for edge ∈ edges(lattice)
             i, j = src(edge), dst(edge)
             if ket[i] > 0 && ket[j] != B.N
@@ -117,13 +112,14 @@ end
 
 function hamiltonian(::Type{T}, B::Basis, lattice::LabelledGraph, ::Val{:dense}) where T <: Real
     n = length(B.eig_vecs)
+
     H = zeros(T, n, n)
+    U = get_prop.(Ref(lattice), vertices(lattice), Ref(:U)) ./ 2
 
     eig_vecs = enumerate(B.eig_vecs)
     for (v, ket) ∈ eig_vecs
         # 1. interaction part:
-        U = get_prop.(Ref(lattice), vertices(lattice), Ref(:U)) ./ 2
-        H[v, v] = sum(U .* ket .* (ket .- 1)) |> T
+        H[v, v] = sum(U .* ket .* (ket .- 1))
 
         # 2. kinetic part:
         for (w, bra) ∈ eig_vecs

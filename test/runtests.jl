@@ -5,8 +5,8 @@ using MetaGraphs
 using Test
 
 my_tests = [
-    "base.jl",
-    #"lattice.jl",
+    "lattice.jl",
+    "model.jl",
 ]
 
 for my_test ∈ my_tests
