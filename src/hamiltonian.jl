@@ -138,10 +138,13 @@ function hamiltonian(::Type{T}, B::Basis, lattice::LabelledGraph, ::Val{:dense})
     H
 end
 
-hamiltonian(::Type{T}, B::Basis, i::Int, s::Symbol) where {T} = hamiltonia(T, B, i, Val(s))
-hamiltonian(B::Basis, i::Int, s::Symbol) = hamiltonia(Float64, B::Basis, i::Int, s)
-hamiltonian(B::Basis, i::Int) = hamiltonia(B, i, :sparse)
+function hamiltonian(::Type{T}, B::Basis, lattice::LabelledGraph, s::Symbol) where {T}
+    hamiltonian(T, B, lattice, Val(s))
+end
+
+hamiltonian(B::Basis, lattice::LabelledGraph, s::Symbol) =
+    hamiltonian(Float64, B, lattice, s)
 
 function hamiltonian(N::Int, M::Int, J::T, U::T, boundry::Symbol) where T <: Real
-    hamiltonian(Basis(N, M), bose_bubbard_1D(M, J, U, Val(boundry)))
+    hamiltonian(Basis(N, M), bose_bubbard_1D(M, J, U, Val(boundry)), :sparse)
 end

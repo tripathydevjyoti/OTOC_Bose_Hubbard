@@ -53,47 +53,10 @@ end
     end
 end
 
-#=
-@testset "Dense creation and annihilation operators" begin
-    for i ∈ 1:M, j ∈ 1:M
-        a_i = annihilation(B, i, :dense)
-        ap_j = creation(B, j, :dense)
-
-        @test iszero(tr(a_i)) && iszero(tr(a_i))
-        @test size(a_i) == size(ap_j) == (D, D)
-
-        # [a_i^†, a_j^†] == [a_i, a_j] == 0
-        @test iszero(commutator(a_i, ap_j |> transpose))
-        @test iszero(commutator(a_i |> transpose, ap_j))
-
-        # [a_i, a_j^†] == δ_ij
-        if i != j
-            @test iszero(commutator(a_i, ap_j))
-        else
-            #@test commutator(a_i, ap_j) == Matrix(1.0 * I, D, D)
-            println(iszero(ap_j))
-            println(iszero(a_i))
-            n_i = occupation(B, i, :dense)
-            @test transpose(a_i) == ap_j
-            @test n_i == ap_j * a_i
-        end
-    end
+@testset "Dense Hamiltonian" begin
+    T = Float64
+    J = T(1)
+    U = T(1/2)
+    H = hamiltonian(M, N, J, U, :OBC)
+    #@test size(H) = (D, D)
 end
-
-@testset "Dense creation and annihilation operators" begin
-    for i ∈ 1:M, j ∈ 1:M
-        a_i = annihilation(B, i)
-        ap_j = creation(B, j)
-
-        @test issparse(a_i)
-        @test issparse(ap_j)
-
-        @test a_i == annihilation(B, i, :sparse)
-        @test ap_j == creation(B, j, :sparse)
-
-        @test tr(a_i) == tr(ap_j) == 0
-        @test size(a_i) == size(ap_j) == (D, D)
-        if i == j @test transpose(a_i) == ap_j end
-    end
-end
-=#
