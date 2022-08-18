@@ -2,13 +2,12 @@ using Test
 using JeszenszkiBasis
 
 
+
 function superposition(
     Ψ ::Vector{Complex{T}},
     basis ::AbstractSzbasis
 )   where T<: Real
     Ψₙ = []
-    #Ψₙ = Int64[]
-    #Ψₙ = Vector{Int64}
     β = Complex[]
 
     Cₙ =broadcast(abs, Ψ)
@@ -30,9 +29,6 @@ function superposition(
     return β,Ψₙ 
     
 end
-
-
-
 
 
 

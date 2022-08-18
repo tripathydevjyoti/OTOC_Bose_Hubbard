@@ -3,7 +3,6 @@ using LinearAlgebra
 
 function time_evolution(
     Eₙ::Vector{Float64},
-    #ψₙ::Array{T, 2},
     ψₙ::Vector{Vector{Int64}},
     ψ₀::Array{Complex{T}, 1},
     t::T
