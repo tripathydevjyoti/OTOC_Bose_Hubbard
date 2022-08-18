@@ -19,11 +19,10 @@ struct Basis{T, S}
 
         if constraint == :conserved_particles
             basis = map(
-                A -> [sum(A .== i) for i ∈ 1:N],
-                with_replacement_combinations(1:N, M)
+                A -> [sum(A .== i) for i ∈ 1:N], with_replacement_combinations(1:N, M)
             )
         elseif constraint == :none
-            basis =[[σ...] for σ ∈ Iterators.product(fill(collect(0:N), M)...)] |> vec
+            basis = [[σ...] for σ ∈ Iterators.product(fill(collect(0:N), M)...)] |> vec
         else
             throw(DomainError("Attempt to specify $constraint which is not allowed."))
         end
@@ -34,4 +33,7 @@ struct Basis{T, S}
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+"""
 get_index(B::Basis, ket::Vector{Int}) = searchsortedfirst(B.tags, tag(ket))
