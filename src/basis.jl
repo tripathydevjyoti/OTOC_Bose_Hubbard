@@ -1,5 +1,4 @@
 export
-    tag,
     Basis,
     get_index
 
