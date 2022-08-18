@@ -20,8 +20,7 @@ function hamiltonian(::Type{T}, B::Basis, lattice::LabelledGraph) where T
         for edge ∈ edges(lattice)
             i, j = src(edge), dst(edge)
             if ket[i] > 0 && ket[j] != B.N
-                tg = tag(destroy_and_create(ket, i, j))
-                w = searchsortedfirst(B.tags, tg)
+                w = get_index(B, destroy_and_create(ket, i, j))
                 Jij = get_prop(lattice, edge, :J)
                 push!(J, v, w)
                 push!(I, w, v)

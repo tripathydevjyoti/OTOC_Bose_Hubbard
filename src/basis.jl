@@ -1,6 +1,7 @@
 export
     tag,
-    Basis
+    Basis,
+    get_index
 
 #tag(v::Vector{Int}) = sum(log.(100 .* collect(1:length(v)) .+ 3) .* v)
 tag(v::Vector{Int}) = hash(v)
@@ -27,3 +28,5 @@ struct Basis{T, S}
         new{Int, eltype(tags)}(N, M, tags[order], basis[order])
     end
 end
+
+get_index(B::Basis, ket::Vector{Int}) = searchsortedfirst(B.tags, tag(ket))
