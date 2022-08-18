@@ -1,8 +1,6 @@
 using LinearAlgebra
 using SparseArrays
 
-commutator(A, B) = A * B .- B * A
-
 M = N = 3
 D = Int(factorial(N + M − 1) / factorial(N) / factorial(M − 1))
 
@@ -15,6 +13,7 @@ B = Basis(M, N)
             @test eltype(n_i) == T
             @test isdiag(n_i)
             @test transpose(n_i) == n_i
+            @test size(n_i) == (D, D)
         end
         @test occupation(T, B) == sum(occupation(B, i) for i ∈ 1:M)
     end

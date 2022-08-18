@@ -36,10 +36,9 @@ function annihilation(::Type{T}, B::Basis, i::Int) where T <: Real
     end
     sparse(I, J, V, n, n)
 end
-annihilation(B::Basis, i::Int, s::Symbol) = annihilation(Float64, B::Basis, i::Int, s)
+annihilation(B::Basis, i::Int, s::Symbol) = annihilation(Float64, B::Basis, i::Int)
 
 """
 $(TYPEDSIGNATURES)
 """
 creation(::Type{T}, B::Basis, i::Int) where {T} = transpose(annihilation(T, B, i))
-creation(::Type{T}, B::Basis) where {T} = creation(T, B, i, :sparse)

@@ -2,7 +2,7 @@ export
     lattice,
     bose_bubbard_1D
 
-    const Instance = Union{String, Dict}
+const Instance = Union{String, Dict}
 
 """
 $(TYPEDSIGNATURES)
