@@ -14,5 +14,6 @@ function OTOC_bose_bubbard(
     U, infoU = exponentiate(H,  1im * time, ket; (kwargs..., ishermitian=true)...)
     V, infoV = exponentiate(H, -1im * time, ket; (kwargs..., ishermitian=true)...)
 
-    dot(a * V * b * U * ket, V * b * U * a * ket)
+    # TBW
+    #dot(a * V * b * U * ket, V * b * U * a * ket)
 end

@@ -1,6 +1,7 @@
 export
     Basis,
-    get_index
+    get_index,
+    dense_eigen_vec
 
 #tag(v::Vector{Int}) = sum(log.(100 .* collect(1:length(v)) .+ 3) .* v)
 tag(v::Vector{Int}) = hash(v)
@@ -37,3 +38,13 @@ end
 $(TYPEDSIGNATURES)
 """
 get_index(B::Basis, ket::Vector{Int}) = searchsortedfirst(B.tags, tag(ket))
+
+"""
+$(TYPEDSIGNATURES)
+"""
+function dense_eigen_vec(::Type{T}, B::Basis, ket::Vector{Int}) where T <: Real
+    dket = zeros(T, length(B.eig_vecs))
+    dket[get_index(B, ket)] = one(T)
+    dket
+end
+dense_eigen_vec(B::Basis, ket::Vector{Int}) = dense_eigen_vec(Float64, B, ket)
