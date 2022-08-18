@@ -4,7 +4,7 @@ using SparseArrays
 M = N = 3
 D = Int(factorial(N + M − 1) / factorial(N) / factorial(M − 1))
 
-B = Basis(M, N)
+B = Basis(M, N; constraint=:conserved_particles)
 
 @testset "Sparse occupation operators" begin
     for T ∈ (Float16, Float32, Float64)

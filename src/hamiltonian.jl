@@ -34,5 +34,6 @@ end
 hamiltonian(B::Basis, lattice::LabelledGraph) = hamiltonian(Float64, B, lattice)
 
 function hamiltonian(N::Int, M::Int, J::T, U::T, boundry::Symbol) where T <: Real
-    hamiltonian(Basis(N, M), bose_bubbard_1D(M, J, U, Val(boundry)))
+    B = Basis(M, N; constraint=:conserved_particles)
+    hamiltonian(B, bose_bubbard_1D(M, J, U, Val(boundry)))
 end

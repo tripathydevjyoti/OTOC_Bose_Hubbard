@@ -14,13 +14,19 @@ struct Basis{T, S}
     tags::Vector{S}
     eig_vecs::Vector{Vector{T}}
 
-    function Basis(N, M)
-        basis = map(
-            A -> [sum(A .== i) for i ∈ 1:N],
-            with_replacement_combinations(1:N, M)
-        )
+    function Basis(N::Int, M::Int; constraint::Symbol=:none)
+        @assert constraint ∈ (:none, :conserved_particles)
 
-       #basis =[[σ...] for σ ∈ Iterators.product(fill(collect(0:N), M)...)] |> vec
+        if constraint == :conserved_particles
+            basis = map(
+                A -> [sum(A .== i) for i ∈ 1:N],
+                with_replacement_combinations(1:N, M)
+            )
+        elseif constraint == :none
+            basis =[[σ...] for σ ∈ Iterators.product(fill(collect(0:N), M)...)] |> vec
+        else
+            throw(DomainError("Attempt to specify $constraint which is not allowed."))
+        end
 
         tags = tag.(basis)
         order = sortperm(tags)

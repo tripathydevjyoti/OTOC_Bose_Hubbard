@@ -1,7 +1,7 @@
 M = N = 3
 D = Int(factorial(N + M − 1) / factorial(N) / factorial(M − 1))
 
-B = Basis(M, N)
+B = Basis(M, N; constraint=:conserved_particles)
 
 @testset "Dense Hamiltonian" begin
     T = Float64
