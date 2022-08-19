@@ -6,6 +6,8 @@ using MetaGraphs
 using KrylovKit
 using Test
 
+dim(N::Int, M::Int) = Int(factorial(N + M − 1) / factorial(N) / factorial(M − 1))
+
 my_tests = [
     "basis.jl",
     "lattice.jl",
@@ -14,8 +16,6 @@ my_tests = [
     "hamiltonian.jl",
     "time_evolution.jl"
 ]
-
-dim(N::Int, M::Int) = Int(factorial(N + M − 1) / factorial(N) / factorial(M − 1))
 
 for my_test ∈ my_tests
     include(my_test)

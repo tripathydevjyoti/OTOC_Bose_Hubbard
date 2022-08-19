@@ -7,7 +7,7 @@
     T = Float64
     J = T(1)
     U = T(1/2)
-    H = hamiltonian(M, N, J, U, :OBC)
+    H = BoseHubbard(M, N, J, U, :OBC).H
 
     ket = dense_eigen_vec(B, [1, 2, 0])
     num_total = occupation(T, B)
@@ -39,7 +39,7 @@ end
     J = T(4/10)
     U = zero(T)
 
-    H = hamiltonian(N, M, J, U, :OBC)
+    H = BoseHubbard(N, M, J, U, :OBC).H
 
     times = [zero(T) + T(1/10) * i for i ∈ 1:100]
 
@@ -56,7 +56,6 @@ end
         push!(n1, dot(Uket, n_1 * Uket))
         push!(n2, dot(Uket, n_2 * Uket))
     end
-
     @test all(converged .== 1)
 
     @test isapprox(imag.(n1), zeros(T, length(times)), atol = ϵ)

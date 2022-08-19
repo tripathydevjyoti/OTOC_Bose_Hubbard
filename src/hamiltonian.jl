@@ -1,18 +1,16 @@
 export
-    hamiltonian
-
-#=
-struct BoseHubbardHamiltonian
-    basis::Basis
-    lattice::LabelledGraph
-    hamiltonian::SparseArray
-end
-=#
+    BoseHubbard
 
 """
 $(TYPEDSIGNATURES)
 """
-function hamiltonian(::Type{T}, B::Basis, lattice::LabelledGraph) where T
+struct BoseHubbard{T <: Real}
+    basis::Basis
+    lattice::LabelledGraph
+    H::SparseMatrixCSC{T, Int64}
+end
+
+function BoseHubbard{T}(B::Basis, lattice::LabelledGraph) where T <: Real
     n = length(B.eig_vecs)
 
     I, J, V = Int[], Int[], T[]
@@ -37,11 +35,13 @@ function hamiltonian(::Type{T}, B::Basis, lattice::LabelledGraph) where T
             end
         end
     end
-    sparse(I, J, V, n, n)
+    BoseHubbard{T}(B, lattice, sparse(I, J, V, n, n))
 end
-hamiltonian(B::Basis, lattice::LabelledGraph) = hamiltonian(Float64, B, lattice)
+BoseHubbard(B::Basis, lattice::LabelledGraph) = BoseHubbard{Float64}(B, lattice)
 
-function hamiltonian(N::Int, M::Int, J::T, U::T, boundry::Symbol) where T <: Real
-    B = Basis(M, N; constraint=:conserved_particles)
-    hamiltonian(B, bose_bubbard_1D(M, J, U, Val(boundry)))
+function BoseHubbard(N::Int, M::Int, J::T, U::T, bndr::Symbol) where T <: Real
+    BoseHubbard{T}(
+        Basis(M, N; constraint=:conserved_particles),
+        chain(M, J, U, Val(bndr))
+    )
 end

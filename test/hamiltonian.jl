@@ -1,4 +1,4 @@
-@testset "Dense Hamiltonian" begin
+@testset "Hamiltonian" begin
     M = N = 3
     D = dim(N, M)
 
@@ -7,10 +7,12 @@
     T = Float64
     J = T(1)
     U = T(1/2)
-    H = hamiltonian(N, M, J, U, :OBC)
+    ham = BoseHubbard(N, M, J, U, :OBC)
 
-    @test size(H) == (D, D)
-    @test transpose(H) == H
+    #@test ham.basis == B
+    #@test ham.lattice == chain(M, J, U, Val(:OBC))
+    @test size(ham.H) == (D, D)
+    @test transpose(ham.H) == ham.H
 end
 
 @testset "Toy model with 2 sites and 1 particle" begin
@@ -24,7 +26,7 @@ end
     J = T(4/10)
     U = zero(T)
 
-    H = hamiltonian(N, M, J, U, :OBC)
+    H = BoseHubbard(N, M, J, U, :OBC).H
 
     @test size(H) == (D, D)
     @test transpose(H) == H
