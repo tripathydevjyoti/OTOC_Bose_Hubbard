@@ -1,10 +1,6 @@
-using KrylovKit
-using LinearAlgebra
-using LinearAlgebra
-
 @testset "Total number of particles is concerved with time" begin
     M = N = 3
-    D = Int(factorial(N + M − 1) / factorial(N) / factorial(M − 1))
+    D = dim(N, M)
 
     B = Basis(M, N; constraint=:conserved_particles)
 
@@ -31,11 +27,10 @@ using LinearAlgebra
     @test all(T(N) .≈ real.(avg))
 end
 
-
 @testset "Toy model with 2 sites and 1 particle" begin
     M = 2
     N = 1
-    D = Int(factorial(N + M − 1) / factorial(N) / factorial(M − 1))
+    D = dim(N, M)
 
     B = Basis(M, N; constraint=:conserved_particles)
 
@@ -63,7 +58,10 @@ end
     end
 
     @test all(converged .== 1)
+
     @test isapprox(imag.(n1), zeros(T, length(times)), atol = ϵ)
-    @test isapprox(cos.(J .* times) .^ 2, real.(n1), atol = ϵ)
+    @test isapprox(imag.(n2), zeros(T, length(times)), atol = ϵ)
+
+    @test isapprox(cos.(J .* times) .^ 2, real(n1), atol = ϵ)
     @test isapprox(sin.(J .* times) .^ 2, real(n2), atol = ϵ)
 end

@@ -2,7 +2,7 @@ using LinearAlgebra
 using SparseArrays
 
 M = N = 3
-D = Int(factorial(N + M − 1) / factorial(N) / factorial(M − 1))
+D = dim(N, M)
 
 B = Basis(M, N; constraint=:conserved_particles)
 

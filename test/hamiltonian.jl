@@ -1,5 +1,3 @@
-dim(N::Int, M::Int) = Int(factorial(N + M − 1) / factorial(N) / factorial(M − 1))
-
 @testset "Dense Hamiltonian" begin
     M = N = 3
     D = dim(N, M)
