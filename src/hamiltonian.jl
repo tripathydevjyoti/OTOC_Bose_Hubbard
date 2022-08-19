@@ -1,6 +1,14 @@
 export
     hamiltonian
 
+#=
+struct BoseHubbardHamiltonian
+    basis::Basis
+    lattice::LabelledGraph
+    hamiltonian::SparseArray
+end
+=#
+
 """
 $(TYPEDSIGNATURES)
 """
@@ -22,8 +30,8 @@ function hamiltonian(::Type{T}, B::Basis, lattice::LabelledGraph) where T
             if ket[i] > 0 && ket[j] != B.N
                 w = get_index(B, destroy_and_create(ket, i, j))
                 Jij = get_prop(lattice, edge, :J)
-                push!(J, v, w)
-                push!(I, w, v)
+                push!(I, v, w)
+                push!(J, w, v)
                 val = -Jij * sqrt((ket[j] + 1) * ket[i])
                 push!(V, val, conj(val))
             end
