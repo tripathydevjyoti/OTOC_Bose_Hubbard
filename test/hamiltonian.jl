@@ -1,37 +1,32 @@
 @testset "Hamiltonian" begin
     M = N = 3
-    D = dim(N, M)
+    B = NBasis(N, M)
 
-    B = Basis(M, N; constraint=:conserved_particles)
-
-    T = Float64
-    J = T(1)
-    U = T(1/2)
-
-    for bndr ∈ (:OBC, :PBC)
-        ham = BoseHubbard(N, M, J, U, bndr)
-        @test size(ham.H) == (D, D)
-        @test transpose(ham.H) == ham.H
+    for T ∈ (Float16, Float32, Float64)
+        J, U = T(1), T(1/2)
+        for bndr ∈ (:OBC, :PBC)
+            ham = BoseHubbard(N, M, J, U, bndr)
+            @test size(ham.H) == (B.dim, B.dim)
+            @test conj(transpose(ham.H)) == ham.H
+        end
     end
 end
 
 @testset "Toy model with 2 sites and 1 particle" begin
     M, N = 2, 1
-    D = dim(N, M)
 
-    B = Basis(M, N; constraint=:conserved_particles)
+    B = NBasis(N, M)
 
     ϵ = 1E-10
     T = Float64
-    J = T(4/10)
-    U = zero(T)
+    J, U = T(4/10), zero(T)
 
     H = BoseHubbard(N, M, J, U, :OBC).H
 
-    @test size(H) == (D, D)
-    @test transpose(H) == H
+    @test size(H) == (B.dim, B.dim)
+    @test conj(transpose(H)) == H
 
-    evals, eigen_vec = eigen(Hermitian(H |> Array))
+    evals, eigen_vec = eigen(Hermitian(Array(H)))
 
     @test evals ≈ [-J, J]
 

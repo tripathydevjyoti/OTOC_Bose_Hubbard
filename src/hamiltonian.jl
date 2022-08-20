@@ -5,14 +5,12 @@ export
 $(TYPEDSIGNATURES)
 """
 struct BoseHubbard{T <: Real}
-    basis::Basis
+    basis
     lattice::LabelledGraph
     H::SparseMatrixCSC{T, Int64}
 end
 
-function BoseHubbard{T}(B::Basis, lattice::LabelledGraph) where T <: Real
-    n = length(B.eig_vecs)
-
+function BoseHubbard{T}(B, lattice::LabelledGraph) where T <: Real
     I, J, V = Int[], Int[], T[]
     U = get_prop.(Ref(lattice), vertices(lattice), Ref(:U)) ./ T(2)
 
@@ -35,21 +33,20 @@ function BoseHubbard{T}(B::Basis, lattice::LabelledGraph) where T <: Real
             end
         end
     end
-    BoseHubbard{T}(B, lattice, sparse(I, J, V, n, n))
+    BoseHubbard{T}(B, lattice, sparse(I, J, V, B.dim, B.dim))
 end
-BoseHubbard(B::Basis, lattice::LabelledGraph) = BoseHubbard{Float64}(B, lattice)
+BoseHubbard(B, lattice::LabelledGraph) = BoseHubbard{Float64}(B, lattice)
 
 function BoseHubbard(N::Int, M::Int, J::T, U::T, bndr::Symbol) where T <: Real
-    BoseHubbard{T}(Basis(M, N; constraint=:conserved_particles), chain(M, J, U, bndr))
+    BoseHubbard{T}(NBasis(N, M), chain(M, J, U, bndr))
 end
 
-function BoseHubbard(B::Basis, J::T, U::T, graph) where T <: Real
+function BoseHubbard(B, J::T, U::T, graph) where T <: Real
     inst = Dict((src(e), dst(e)) => J for e ∈ edges(graph))
     push!(inst, ((i, i) => U for i ∈ 1:nv(graph))...)
     BoseHubbard{T}(B, lattice(T, inst))
 end
 
 function BoseHubbard(N::Int, M::Int, J::T, U::T, graph) where T <: Real
-    Basis(M, N; constraint=:conserved_particles)
-    BoseHubbard(B, J, U, graph)
+    BoseHubbard(NBasis(N, M), J, U, graph)
 end
