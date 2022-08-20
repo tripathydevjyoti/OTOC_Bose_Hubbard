@@ -35,7 +35,7 @@ function annihilation(::Type{T}, B::Basis, i::Int) where T <: Real
     end
     sparse(I, J, V, n, n)
 end
-annihilation(B::Basis, i::Int, s::Symbol) = annihilation(Float64, B::Basis, i::Int)
+annihilation(B::Basis, i::Int) = annihilation(Float64, B::Basis, i::Int)
 
 """
 $(TYPEDSIGNATURES)

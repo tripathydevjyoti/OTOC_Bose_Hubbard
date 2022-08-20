@@ -14,7 +14,7 @@ function BoseHubbard{T}(B::Basis, lattice::LabelledGraph) where T <: Real
     n = length(B.eig_vecs)
 
     I, J, V = Int[], Int[], T[]
-    U = get_prop.(Ref(lattice), vertices(lattice), Ref(:U)) ./ 2
+    U = get_prop.(Ref(lattice), vertices(lattice), Ref(:U)) ./ T(2)
 
     for (v, ket) ∈ enumerate(B.eig_vecs)
     # 1. interaction part:
@@ -40,8 +40,16 @@ end
 BoseHubbard(B::Basis, lattice::LabelledGraph) = BoseHubbard{Float64}(B, lattice)
 
 function BoseHubbard(N::Int, M::Int, J::T, U::T, bndr::Symbol) where T <: Real
-    BoseHubbard{T}(
-        Basis(M, N; constraint=:conserved_particles),
-        chain(M, J, U, Val(bndr))
-    )
+    BoseHubbard{T}(Basis(M, N; constraint=:conserved_particles), chain(M, J, U, bndr))
+end
+
+function BoseHubbard(B::Basis, J::T, U::T, graph) where T <: Real
+    inst = Dict((src(e), dst(e)) => J for e ∈ edges(graph))
+    push!(inst, ((i, i) => U for i ∈ 1:nv(graph))...)
+    BoseHubbard{T}(B, lattice(T, inst))
+end
+
+function BoseHubbard(N::Int, M::Int, J::T, U::T, graph) where T <: Real
+    Basis(M, N; constraint=:conserved_particles)
+    BoseHubbard(B, J, U, graph)
 end

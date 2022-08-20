@@ -2,29 +2,34 @@
     M = N = 3
     D = dim(N, M)
 
-    B = Basis(M, N; constraint=:conserved_particles)
+    for T ∈ (Float16, Float32, Float64, )
+        J = T(1)
+        U = T(1/2)
+        for constraint ∈ (:conserved_particles, :none)
+            B = Basis(M, N; constraint=constraint)
 
-    T = Float64
-    J = T(1)
-    U = T(1/2)
-    H = BoseHubbard(M, N, J, U, :OBC).H
+            ket = dense_eigen_vec(B, [1, 2, 0])
+            num_total = occupation(T, B)
 
-    ket = dense_eigen_vec(B, [1, 2, 0])
-    num_total = occupation(T, B)
+            times = [zero(T) + T(1/10) * i for i ∈ 1:100]
 
-    times = [zero(T) + T(1/10) * i for i ∈ 1:100]
-    avg = Complex{T}[]
-    converged = Int[]
+            for graph ∈ (path_graph(M), path_digraph(M), star_digraph(M), turan_graph(M, 2))
+                avg = Complex{T}[]
+                converged = Int[]
 
-    for t ∈ times
-        Uket, info = exponentiate(H, -1im * t, ket, ishermitian=true)
-        push!(converged, info.converged)
-        push!(avg, dot(Uket, num_total * Uket))
+                H = BoseHubbard(B, J, U, graph).H
+                for t ∈ times
+                    Uket, info = exponentiate(H, -1im * t, ket, ishermitian=true)
+                    push!(converged, info.converged)
+                    push!(avg, dot(Uket, num_total * Uket))
+                end
+
+                @test all(converged .== 1)
+                @test isapprox(imag.(avg), zeros(T, length(times)), atol = 1E-14)
+                @test all(T(N) .≈ real.(avg))
+            end
+        end
     end
-
-    @test all(converged .== 1)
-    @test isapprox(imag.(avg), zeros(T, length(times)), atol = 1E-14)
-    @test all(T(N) .≈ real.(avg))
 end
 
 @testset "Toy model with 2 sites and 1 particle" begin

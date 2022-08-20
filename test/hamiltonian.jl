@@ -7,12 +7,12 @@
     T = Float64
     J = T(1)
     U = T(1/2)
-    ham = BoseHubbard(N, M, J, U, :OBC)
 
-    #@test ham.basis == B
-    #@test ham.lattice == chain(M, J, U, Val(:OBC))
-    @test size(ham.H) == (D, D)
-    @test transpose(ham.H) == ham.H
+    for bndr ∈ (:OBC, :PBC)
+        ham = BoseHubbard(N, M, J, U, bndr)
+        @test size(ham.H) == (D, D)
+        @test transpose(ham.H) == ham.H
+    end
 end
 
 @testset "Toy model with 2 sites and 1 particle" begin
