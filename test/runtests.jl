@@ -15,7 +15,7 @@ my_tests = [
     "conserved_operators.jl",
     "create_destroy.jl",
     "hamiltonian.jl",
-    #"time_evolution.jl"
+    "time_evolution.jl"
 ]
 
 for my_test ∈ my_tests

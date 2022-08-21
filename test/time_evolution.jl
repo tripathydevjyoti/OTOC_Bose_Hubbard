@@ -1,14 +1,13 @@
 @testset "Total number of particles is concerved with time" begin
     M = N = 3
-    D = dim(N, M)
 
     for T ∈ (Float16, Float32, Float64, )
         J = T(1)
         U = T(1/2)
 
-        B = NBasis(M, N)
+        B = NBasis(N, M)
 
-        ket = dense_eigen_vec(B, [1, 2, 0])
+        ket = dense([1, 2, 0], B)
         num_total = occupation(T, B)
 
         times = [zero(T) + T(1/10) * i for i ∈ 1:100]
@@ -33,6 +32,7 @@ end
 
 @testset "Toy model with 2 sites and 1 particle" begin
     M, N = 2, 1
+    B = NBasis(N, M)
 
     ϵ = 1E-10
     T = Float64
@@ -49,7 +49,7 @@ end
     converged = Int[]
     n1, n2 = Complex{T}[], Complex{T}[]
 
-    ket = dense_eigen_vec(B, [1, 0])
+    ket = dense([1, 0], B)
     for t ∈ times
         Uket, info = exponentiate(H, -1im * t, ket, ishermitian=true)
         push!(converged, info.converged)
