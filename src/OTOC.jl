@@ -35,7 +35,6 @@ function OTOC(
     @assert info.converged == 1
 
     idx = findall(!iszero, V_ap_U_ket)
-    println("c ", idx)
     a_V_ap_U_ket = dense(
         State(V_ap_U_ket[idx], destroy.(ham.basis.eig_vecs[idx], j)), ham.basis
     )
