@@ -26,7 +26,7 @@ end
 
             if i == j
                 @test a_i ≈ ap_j |> transpose
-                @test ap_j * a_i ≈ occupation(T, B.eig_vecs, i) |> Array
+                @test ap_j * a_i ≈ occupation(T, B, i) |> Array
             else
                 @test commutator(a_i, ap_j) ≈ zeros(T, B.dim, B.dim)
             end

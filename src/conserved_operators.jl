@@ -4,29 +4,27 @@ export
 """
 $(TYPEDSIGNATURES)
 """
-function occupation(::Type{T}, eig_vecs::Vector{Vector{Int}}) where T <: Real
-    dim = length(eig_vecs)
-    I = Vector{Int}(undef, dim)
-    V = Vector{T}(undef, dim)
-    for v ∈ 1:dim
+function occupation(::Type{T}, B) where T <: Real
+    I = Vector{Int}(undef, B.dim)
+    V = Vector{T}(undef, B.dim)
+    for v ∈ 1:B.dim
         I[v] = v
-        V[v] = sum(eig_vecs[v])
+        V[v] = sum(B.eig_vecs[v])
     end
-    sparse(I, I, V, dim, dim)
+    sparse(I, I, V, B.dim, B.dim)
 end
 
 """
 $(TYPEDSIGNATURES)
 """
-function occupation(::Type{T}, eig_vecs::Vector{Vector{Int}}, i::Int) where T
-    dim = length(eig_vecs)
-    I = Vector{Int}(undef, dim)
-    V = Vector{T}(undef, dim)
-    for v ∈ 1:dim
+function occupation(::Type{T}, B, i::Int) where T
+    I = Vector{Int}(undef, B.dim)
+    V = Vector{T}(undef, B.dim)
+    for v ∈ 1:B.dim
         I[v] = v
-        V[v] = eig_vecs[v][i]
+        V[v] = B.eig_vecs[v][i]
     end
-    sparse(I, I, V, dim, dim)
+    sparse(I, I, V, B.dim, B.dim)
 end
-occupation(eig_vecs::Vector{Vector{Int}}) = occupation(Float64, eig_vecs)
-occupation(eig_vecs::Vector{Vector{Int}}, i::Int) = occupation(Float64, eig_vecs, i)
+occupation(B) = occupation(Float64, B)
+occupation(B, i::Int) = occupation(Float64, B, i)

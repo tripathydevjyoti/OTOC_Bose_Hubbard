@@ -19,28 +19,7 @@ all_states(N::Int, M::Int) = vec(collect.(Iterators.product(fill(collect(0:N), M
 """
 $(TYPEDSIGNATURES)
 """
-function all_sub_states(N::Int, M::Int)
-    basis = Vector{Int}[]
-    η = [N, zeros(Int, M-1)...]
-    push!(basis, η)
-
-    for _ ∈ 1:M
-        while η[1] > 0
-            η = copy(η)
-            η[1] -= 1
-            η[2] += 1
-            push!(basis, η)
-        end
-        i = findfirst(k->k != 0, basis[end])
-        if i == M return break end
-        η = copy(basis[end])
-        η[i+1] += 1
-        η[1] = η[i] - 1
-        η[i] = 0
-        push!(basis, η)
-    end
-    basis
-end
+all_sub_states(N::Int, M::Int) = collect(multiexponents(M, N))
 
 struct Basis{T, S} <: AbstractBasis
     N::T
