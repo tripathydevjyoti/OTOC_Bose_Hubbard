@@ -15,6 +15,6 @@ module OTOC_Bose_Hubbard
     include("create_destroy.jl")
     include("conserved_operators.jl")
     include("hamiltonian.jl")
-    #include("OTOC.jl")
+    include("OTOC.jl")
 
 end # modul

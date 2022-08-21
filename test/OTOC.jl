@@ -1,28 +1,19 @@
 
 @testset "OTOC" begin
+    K = 4
     M, N = 3, 3
 
-    ϵ = 1E-10
     T = Float64
-    J = T(4/10)
-    U = zero(T)
+    J, U = T(4/10), zero(T)
 
-    H = BoseHubbard(N, M, J, U, :OBC).H
+    H = BoseHubbard([N, N-1], M, J, U, :OBC)
 
-    times = [zero(T) + T(1/10) * i for i ∈ 1:100]
+    times = [zero(T) + T(1/10) * i for i ∈ 1:10]
 
-    ket = dense_eigen_vec(B, [1, 0])
+    state = State(rand(T, K), H.basis.eig_vecs[1:K])
+    otoc = []
+    i, j = 1, 2
     for t ∈ times
-        Uket, info = exponentiate(H, -1im * t, ket, ishermitian=true)
-        push!(converged, info.converged)
-        push!(n1, dot(Uket, n_1 * Uket))
-        push!(n2, dot(Uket, n_2 * Uket))
+        push!(otoc, OTOC(H, i, j, state, t))
     end
-    @test all(converged .== 1)
-
-    @test isapprox(imag.(n1), zeros(T, length(times)), atol = ϵ)
-    @test isapprox(imag.(n2), zeros(T, length(times)), atol = ϵ)
-
-    @test isapprox(cos.(J .* times) .^ 2, real(n1), atol = ϵ)
-    @test isapprox(sin.(J .* times) .^ 2, real(n2), atol = ϵ)
 end

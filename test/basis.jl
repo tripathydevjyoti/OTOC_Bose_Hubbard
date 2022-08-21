@@ -43,3 +43,19 @@ end
     state = State(vec[idx], NB.eig_vecs[idx])
     @test dense(state, NB) ≈ vec
 end
+
+@testset "NBasis (Sectors)" begin
+    M = N = 3
+
+    B1 = NBasis(N, M)
+    B2 = NBasis(N-1, M)
+
+    NB = NBasis([N, N-1], M)
+    NB2 = NBasis([N-1, N], M)
+
+    @test NB.dim == B1.dim + B2.dim == NB2.dim
+    @test NB.N == [N, N-1]
+    @test NB2.N == [N-1, N]
+    @test NB.M == B1.M == B2.M == M == NB2.M
+    @test Set(NB.eig_vecs) == Set(NB2.eig_vecs) == union(Set(B1.eig_vecs), Set(B2.eig_vecs))
+end

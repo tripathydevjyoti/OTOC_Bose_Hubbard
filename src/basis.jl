@@ -7,10 +7,12 @@ export
 
 abstract type AbstractBasis end
 
+const IntOrVec = Union{Int, Vector{Int}}
+
 """
 $(TYPEDSIGNATURES)
 """
-tag(v::Vector{Int}) = hash(v)
+tag(v::Vector{T}) where T = hash(v)
 
 """
 $(TYPEDSIGNATURES)
@@ -21,6 +23,7 @@ all_states(N::Int, M::Int) = vec(collect.(Iterators.product(fill(collect(0:N), M
 $(TYPEDSIGNATURES)
 """
 all_sub_states(N::Int, M::Int) = collect(multiexponents(M, N))
+all_sub_states(N::Vector{Int}, M::Int) = vcat(all_sub_states.(N, M)...)
 
 """
 $(TYPEDSIGNATURES)
@@ -48,21 +51,20 @@ end
 $(TYPEDSIGNATURES)
 """
 struct NBasis{T, S} <: AbstractBasis
-    N::T
+    N::Union{T, Vector{T}}
     M::T
     dim::T
     tags::Vector{S}
     eig_vecs::Vector{Vector{T}}
 
-    function NBasis(N::Int, M::Int)
-        basis = all_sub_states(N, M)
-        tags = tag.(basis)
+    function NBasis(states::Vector, N::IntOrVec, M::Int)
+        tags = tag.(states)
         order = sortperm(tags)
-        new{Int, eltype(tags)}(
-            N, M, length(basis), tags[order], basis[order]
-        )
+        new{Int, eltype(tags)}(N, M, length(states), tags[order], states[order])
     end
+    NBasis(N::IntOrVec, M::Int) = NBasis(all_sub_states(N, M), N, M)
 end
+
 
 """
 $(TYPEDSIGNATURES)
@@ -74,7 +76,7 @@ struct State{T}
     State(coeff, vecs) = new{eltype(coeff)}(coeff, vecs)
 end
 
-Base.eltype(state::State{T}) where T = eltype(eltype(state.coeff))
+Base.eltype(state::State{T}) where {T} = T
 
 """
 $(TYPEDSIGNATURES)
@@ -84,7 +86,7 @@ get_index(B::T, ket::Vector{Int}) where T <: AbstractBasis = searchsortedfirst(B
 """
 $(TYPEDSIGNATURES)
 """
-function dense(::Type{T}, ket::Vector{Int}, B::S) where {T <: Real, S <: AbstractBasis}
+function dense(::Type{T}, ket::Vector{Int}, B::S) where {T <: Number, S <: AbstractBasis}
     dket = zeros(T, B.dim)
     dket[get_index(B, ket)] = one(T)
     dket
