@@ -1,8 +1,9 @@
 export
     Basis,
     NBasis,
+    State,
     get_index,
-    dense_eigen_vec
+    dense
 
 abstract type AbstractBasis end
 
@@ -21,6 +22,9 @@ $(TYPEDSIGNATURES)
 """
 all_sub_states(N::Int, M::Int) = collect(multiexponents(M, N))
 
+"""
+$(TYPEDSIGNATURES)
+"""
 struct Basis{T, S} <: AbstractBasis
     N::T
     M::T
@@ -40,6 +44,9 @@ struct Basis{T, S} <: AbstractBasis
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+"""
 struct NBasis{T, S} <: AbstractBasis
     N::T
     M::T
@@ -60,14 +67,30 @@ end
 """
 $(TYPEDSIGNATURES)
 """
-get_index(B, ket::Vector{Int}) = searchsortedfirst(B.tags, tag(ket))
+struct State{T}
+    coeff::Vector{T}
+    eig_vecs::Vector{Vector{Int}}
+
+    State(coeff, vecs) = new{eltype(coeff)}(coeff, vecs)
+end
+
+Base.eltype(state::State{T}) where T = eltype(eltype(state.coeff))
 
 """
 $(TYPEDSIGNATURES)
 """
-function dense_eigen_vec(::Type{T}, B, ket::Vector{Int}) where T <: Real
-    dket = zeros(T, length(B.eig_vecs))
+get_index(B::T, ket::Vector{Int}) where T <: AbstractBasis = searchsortedfirst(B.tags, tag(ket))
+
+"""
+$(TYPEDSIGNATURES)
+"""
+function dense(::Type{T}, ket::Vector{Int}, B::S) where {T <: Real, S <: AbstractBasis}
+    dket = zeros(T, B.dim)
     dket[get_index(B, ket)] = one(T)
     dket
 end
-dense_eigen_vec(B, ket::Vector{Int}) = dense_eigen_vec(Float64, B, ket)
+dense(ket::Vector{Int}, B::T) where T <: AbstractBasis = dense(Float64, ket, B)
+
+function dense(state::State, B)
+     sum(state.coeff .* dense.(Ref(eltype(state)), state.eig_vecs, Ref(B)))
+end

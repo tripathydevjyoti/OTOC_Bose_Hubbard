@@ -3,25 +3,35 @@ export
 
 """
 $(TYPEDSIGNATURES)
-a * V * b * U * ket, V * b * U * a * ket
 """
 function OTOC_bose_bubbard(
-    H::S, a::S, b:::S,
-    ket::Array{Complex{T}},
-    time::T;
-    kwargs
-) where {T <: Real, S <: SparseArrays}
+    H::S, i::Int, j::Int, state::State{S}, time::T; kwargs
+) where {S, T <: Real}
+    τ = 1im * time
     args = (kwargs..., ishermitian=true)
 
-    Ua_ket, infoU = exponentiate(H, 1im * time, a * ket, args...)
-    @assert infoU.concerved == 1
-    VbUa_ket, infoV = exponentiate(H, -1im * time, b * Ua_ket, args...)
-    @assert infoV.concerved == 1
+    # 1. compute |x> := V * ap_j * U * a_i * ket
+    a_ket = State(state.coeff, destroy.(state.eig_vecs, i))
+    U_a_ket, infoU = exponentiate(H, τ, dense(a_ket, B.basis), args...)
+    @assert infoU.converged == 1
 
-    U_ket, infoU = exponentiate(H, 1im * time, ket, args...)
-    @assert infoU.concerved == 1
-    VbU_ket, infoV = exponentiate(H, -1im * time, b * U_ket, args...)
-    @assert infoV.concerved == 1
+    idx = findall(!iszero, U_a_ket)
+    ap_U_a_ket = State(U_a_ket[idx], create.(B.basis[idx], j))
+    V_ap_U_a_ket, infoV = exponentiate(H, -τ, dense(ap_U_a_ket, B.basis), args...)
+    @assert infoV.converged == 1
 
-    dot(a * VbU_ket, VbUa_ket)
+    # 2. compute |y> := a_i * V * ap_j * U * ket
+    U_ket, infoU = exponentiate(H, τ, dense(state), args...)
+    @assert infoV.converged == 1
+
+    idx = findall(!iszero, U_ket)
+    ap_U_ket = State(U_ket[idx], create.(B.basis[idx], j))
+    V_ap_U_ket, infoV = exponentiate(H, -τ, dense(ap_U_ket, B.basis), args...)
+    @assert infoV.converged == 1
+
+    idx = findall(!iszero, V_ap_U_ket)
+    a_V_ap_U_ket = dense(State(V_ap_U_ket[idx], destroy.(B.basis[idx], j)))
+
+    # 3. <y|x>
+    dot(a_V_ap_U_ket, V_ap_U_a_ket)
 end

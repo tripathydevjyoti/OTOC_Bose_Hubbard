@@ -24,7 +24,7 @@ function BoseHubbard{T}(B, lattice::LabelledGraph) where T <: Real
         for edge ∈ edges(lattice)
             i, j = src(edge), dst(edge)
             if ket[i] > 0 && ket[j] != B.N
-                w = get_index(B, destroy_and_create(ket, i, j))
+                w = get_index(B, create(destroy(ket, i), j))
                 Jij = get_prop(lattice, edge, :J)
                 push!(I, v, w)
                 push!(J, w, v)

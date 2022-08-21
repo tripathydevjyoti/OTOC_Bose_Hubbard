@@ -30,8 +30,8 @@ end
 
     @test evals ≈ [-J, J]
 
-    w0 = dense_eigen_vec(B, [1, 0])
-    w1 = dense_eigen_vec(B, [0, 1])
+    w0 = dense([1, 0], B)
+    w1 = dense([0, 1], B)
 
     v0 = (w0 .+ w1) ./ sqrt(2)
     v1 = (w0 .- w1) ./ sqrt(2)

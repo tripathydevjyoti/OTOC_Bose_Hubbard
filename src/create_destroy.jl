@@ -1,6 +1,6 @@
 export
     operate,
-    destroy_and_create,
+    create, destroy,
     creation, annihilation
 
 """
@@ -12,13 +12,8 @@ function operate(ket::Vector{Int}, i::Int, op::Symbol)
     op == :destroy ? nket[i] -= 1 : nket[i] += 1
     nket
 end
-
-"""
-$(TYPEDSIGNATURES)
-"""
-function destroy_and_create(ket::Vector{Int}, i::Int, j::Int)
-    operate(operate(ket, i, :destroy), j, :create)
-end
+create(ket::Vector{Int}, i::Int) = operate(ket, i, :create)
+destroy(ket::Vector{Int}, i::Int) = operate(ket, i, :destroy)
 
 """
 $(TYPEDSIGNATURES)

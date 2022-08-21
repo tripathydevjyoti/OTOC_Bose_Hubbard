@@ -1,4 +1,6 @@
 
+K = 6
+
 SB = [
     [3, 0, 0], [2, 1, 0], [2, 0, 1], [1, 2, 0],
     [1, 1, 1], [1, 0, 2], [0, 3, 0], [0, 2, 1],
@@ -6,7 +8,7 @@ SB = [
 ]
 
 @testset "Basis" begin
-    for (M, N) ∈ ((m, n) for m ∈ 1:5, n ∈ 1:5)
+    for (M, N) ∈ ((m, n) for m ∈ 1:K, n ∈ 1:K)
         B = Basis(N, M)
         NB = NBasis(N, M)
         I = B.sub_basis_indices
@@ -20,5 +22,24 @@ SB = [
         @test all(sum.(B.eig_vecs[I]) .== N) && all(sum.(NB.eig_vecs) .== N)
         @test B.N == N == NB.N && B.M == M == NB.M
         @test issorted(B.tags) && issorted(NB.tags)
+        @test length(I) == NB.dim
     end
+end
+
+@testset "Superposition" begin
+    M = N = 3
+    NB = NBasis(N, M)
+
+    for T ∈ (Float16, Float32, Float64)
+        coeff = rand(Complex{T}, NB.dim)
+        state = State(coeff, NB.eig_vecs)
+
+        @test eltype(state) == eltype(coeff)
+        @test length(state.eig_vecs) == NB.dim == length(state.coeff)
+    end
+
+    vec = sprandn(NB.dim, 0.25) |> Array
+    idx = findall(!iszero, vec)
+    state = State(vec[idx], NB.eig_vecs[idx])
+    @test dense(state, NB) ≈ vec
 end
