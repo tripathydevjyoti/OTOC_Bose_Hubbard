@@ -7,7 +7,7 @@ $(TYPEDSIGNATURES)
 function OTOC(
     ham::S, i::Int, j::Int, state::State, time::T; kwargs=()
 ) where {S <: BoseHubbard, T <: Real}
-    τ = 1im * time
+    τ = -1im * time
 
     # 1. compute |x> := V * a_j * U * a_i * ket
     ai_ket = dense(destroy(state, i), ham.basis)
