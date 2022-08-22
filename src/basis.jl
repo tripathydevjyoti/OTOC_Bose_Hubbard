@@ -87,7 +87,7 @@ Base.eltype(state::State{T}) where {T} = T
 """
 $(TYPEDSIGNATURES)
 """
-get_index(B::T, ket::Vector{Int}) where T <: AbstractBasis = searchsortedfirst(B.tags, tag(ket))
+@inline get_index(B::T, ket::Vector{Int}) where T <: AbstractBasis = searchsortedfirst(B.tags, tag(ket))
 
 """
 $(TYPEDSIGNATURES)
@@ -100,5 +100,9 @@ end
 dense(ket::Vector{Int}, B::T) where T <: AbstractBasis = dense(Float64, ket, B)
 
 function dense(state::State, B::T) where T <: AbstractBasis
-     sum(state.coeff .* dense.(Ref(eltype(state)), state.eig_vecs, Ref(B)))
+    dket = zeros(eltype(state.coeff), B.dim)
+    Threads.@threads for i ∈ 1:length(state.eig_vecs)
+        dket[get_index(B, state.eig_vecs[i])] = state.coeff[i]
+    end
+    dket
 end

@@ -17,8 +17,8 @@ function bench(N, M, K, graph)
     0
 end
 
-M = 10
-N = 10
+M = 8
+N = 8
 K = 10
 graph = star_digraph(M)
 
