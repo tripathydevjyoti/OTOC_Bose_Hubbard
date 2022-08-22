@@ -65,7 +65,6 @@ struct NBasis{T, S} <: AbstractBasis
     NBasis(N::IntOrVec, M::Int) = NBasis(all_sub_states(N, M), N, M)
 end
 
-
 """
 $(TYPEDSIGNATURES)
 """
@@ -73,7 +72,14 @@ struct State{T}
     coeff::Vector{T}
     eig_vecs::Vector{Vector{Int}}
 
-    State(coeff, vecs) = new{eltype(coeff)}(coeff, vecs)
+    function State(coeff::Vector{T}, vecs::Vector{Vector{Int}}) where T <: Number
+        new{eltype(coeff)}(coeff, vecs)
+    end
+
+    function State(ket::Vector{T}, B::S) where {T <: Number, S <: AbstractBasis}
+        K = findall(!iszero, ket)
+        State(ket[K], B.eig_vecs[K])
+    end
 end
 
 Base.eltype(state::State{T}) where {T} = T
@@ -93,6 +99,6 @@ function dense(::Type{T}, ket::Vector{Int}, B::S) where {T <: Number, S <: Abstr
 end
 dense(ket::Vector{Int}, B::T) where T <: AbstractBasis = dense(Float64, ket, B)
 
-function dense(state::State, B)
+function dense(state::State, B::T) where T <: AbstractBasis
      sum(state.coeff .* dense.(Ref(eltype(state)), state.eig_vecs, Ref(B)))
 end

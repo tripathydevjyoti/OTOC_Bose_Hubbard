@@ -6,9 +6,11 @@
     T = Float64
     J, U = T(4/10), zero(T)
 
-    H = BoseHubbard([N, N-1], M, J, U, :OBC)
+    graph = star_digraph(M)
+    B = NBasis([N, N-1, N-2], M)
+    H = BoseHubbard(B, J, U, graph)
 
-    times = [zero(T) + T(1/10) * i for i ∈ 1:10]
+    times = [zero(T) + T(1/10) * i for i ∈ 1:100]
 
     state = State(rand(T, K), H.basis.eig_vecs[1:K])
     otoc = []

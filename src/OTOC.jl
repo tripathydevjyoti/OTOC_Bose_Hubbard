@@ -9,36 +9,25 @@ function OTOC(
 ) where {S <: BoseHubbard, T <: Real}
     τ = 1im * time
 
-    # 1. compute |x> := V * ap_j * U * a_i * ket
-    a_ket = dense(
-        State(state.coeff, destroy.(state.eig_vecs, i)), ham.basis
-    )
-    U_a_ket, info = exponentiate(ham.H, τ, a_ket, ishermitian=true)
+    # 1. compute |x> := V * a_j * U * a_i * ket
+    ai_ket = dense(destroy(state, i), ham.basis)
+    U_ai_ket, info = exponentiate(ham.H, τ, ai_ket, ishermitian=true)
     @assert info.converged == 1
 
-    idx = findall(!iszero, U_a_ket)
-    ap_U_a_ket = dense(
-        State(U_a_ket[idx], create.(ham.basis.eig_vecs[idx], j)), ham.basis
-    )
-    V_ap_U_a_ket, info = exponentiate(ham.H, -τ, ap_U_a_ket, ishermitian=true, kwargs...)
+    aj_U_ai_ket = dense(destroy(State(U_ai_ket, ham.basis), j), ham.basis)
+    V_aj_U_ai_ket, info = exponentiate(ham.H, -τ, aj_U_ai_ket, ishermitian=true, kwargs...)
     @assert info.converged == 1
 
-    # 2. compute |y> := a_i * V * ap_j * U * ket
+    # 2. compute |y> := a_i * V * a_j * U * ket
     U_ket, info = exponentiate(ham.H, τ, dense(state, ham.basis), ishermitian=true, kwargs...)
     @assert info.converged == 1
 
-    idx = findall(!iszero, U_ket)
-    ap_U_ket = dense(
-        State(U_ket[idx], create.(ham.basis.eig_vecs[idx], j)), ham.basis
-    )
-    V_ap_U_ket, info = exponentiate(ham.H, -τ, ap_U_ket, ishermitian=true, kwargs...)
+    aj_U_ket = dense(destroy(State(U_ket, ham.basis), j), ham.basis)
+    V_aj_U_ket, info = exponentiate(ham.H, -τ, aj_U_ket, ishermitian=true, kwargs...)
     @assert info.converged == 1
 
-    idx = findall(!iszero, V_ap_U_ket)
-    a_V_ap_U_ket = dense(
-        State(V_ap_U_ket[idx], destroy.(ham.basis.eig_vecs[idx], j)), ham.basis
-    )
+    ai_V_aj_U_ket = dense(destroy(State(V_aj_U_ket, ham.basis), i), ham.basis)
 
-    # 3. <y|x>
-    dot(a_V_ap_U_ket, V_ap_U_a_ket)
+    # 3. compute OTOC: <y|x>
+    dot(ai_V_aj_U_ket, V_aj_U_ai_ket)
 end

@@ -6,14 +6,19 @@ export
 """
 $(TYPEDSIGNATURES)
 """
-function operate(ket::Vector{Int}, i::Int, op::Symbol)
-    @assert op ∈ (:create, :destroy)
+function operate(ket::Vector{Int}, i::Int, c::Int)
     nket = copy(ket)
-    op == :destroy ? nket[i] -= 1 : nket[i] += 1
+    nket[i] += c
     nket
 end
-create(ket::Vector{Int}, i::Int) = operate(ket, i, :create)
-destroy(ket::Vector{Int}, i::Int) = operate(ket, i, :destroy)
+
+create(ket::Vector{Int}, i::Int) = operate(ket, i, 1)
+destroy(ket::Vector{Int}, i::Int) = ket[i] > 0 ? operate(ket, i, -1) : 0
+
+function destroy(state::State{T}, i::Int) where T
+    K = findall(iszero, destroy.(state.eig_vecs, i))
+    State(state.coeff[K], state.eig_vecs[K])
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -24,7 +29,7 @@ function annihilation(::Type{T}, B::Basis, i::Int) where T <: Real
     for (v, ket) ∈ enumerate(B.eig_vecs)
         if ket[i] > 0
             push!(J, v)
-            push!(I, get_index(B, operate(ket, i, :destroy)))
+            push!(I, get_index(B, operate(ket, i, -1)))
             push!(V, T(ket[i]) |> sqrt)
         end
     end

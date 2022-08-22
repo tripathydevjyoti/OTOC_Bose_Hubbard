@@ -37,7 +37,7 @@ function BoseHubbard{T}(B, lattice::LabelledGraph) where T <: Real
 end
 BoseHubbard(B, lattice::LabelledGraph) = BoseHubbard{Float64}(B, lattice)
 
-function BoseHubbard(N::Int, M::Int, J::T, U::T, bndr::Symbol) where T <: Real
+function BoseHubbard(N::IntOrVec, M::Int, J::T, U::T, bndr::Symbol) where T <: Real
     BoseHubbard{T}(NBasis(N, M), chain(M, J, U, bndr))
 end
 
@@ -47,6 +47,6 @@ function BoseHubbard(B, J::T, U::T, graph) where T <: Real
     BoseHubbard{T}(B, lattice(T, inst))
 end
 
-function BoseHubbard(N::Int, M::Int, J::T, U::T, graph) where T <: Real
+function BoseHubbard(N::IntOrVec, M::Int, J::T, U::T, graph) where T <: Real
     BoseHubbard(NBasis(N, M), J, U, graph)
 end
