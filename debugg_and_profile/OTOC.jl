@@ -17,12 +17,12 @@ function bench(N, M, K, graph)
     0
 end
 
-M = 8
-N = 8
+M = 10
+N = 10
 K = 10
 graph = star_digraph(M)
 
 bench(N, M, K, graph)
 @profile bench(N, M, K, graph)
 
-pprof(flamegraph(); webhost = "localhost", webport = 54326)
+pprof(flamegraph(); webhost = "localhost", webport = 51356)

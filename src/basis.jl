@@ -72,7 +72,7 @@ struct State{T}
     coeff::Vector{T}
     eig_vecs::Vector{Vector{Int}}
 
-    function State(coeff::Vector{T}, vecs::Vector{Vector{Int}}) where T <: Number
+    function State(coeff::Vector{T}, vecs::Vector) where T <: Number
         new{eltype(coeff)}(coeff, vecs)
     end
 
