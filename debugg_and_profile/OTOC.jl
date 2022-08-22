@@ -25,4 +25,4 @@ graph = star_digraph(M)
 bench(N, M, K, graph)
 @profile bench(N, M, K, graph)
 
-pprof(flamegraph(); webhost = "localhost", webport = 51316)
+pprof(flamegraph(); webhost = "localhost", webport = 54326)
