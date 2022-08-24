@@ -6,7 +6,9 @@ function superposition(
     Ψ ::Vector{Complex{T}},
     basis ::AbstractSzbasis
 )   where T<: Real
-    Ψₙ = []
+    
+
+    Ψₙ = Vector{Int64}[]
     β = Complex[]
 
     Cₙ =broadcast(abs, Ψ)

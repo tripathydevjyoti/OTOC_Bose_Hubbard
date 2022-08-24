@@ -9,6 +9,9 @@ function sparse_hamiltonian(basis::AbstractSzbasis)
     rows=Int64[]
     cols=Int64[]
     elements=Float64[]
+    U=16
+    t=4
+    L=6
 
     for (i,bra) in enumerate(basis)
         #diagonal entries
@@ -23,7 +26,12 @@ function sparse_hamiltonian(basis::AbstractSzbasis)
         #off-diagonal entries
 
         for j in 1:L
-            j_next = mod(j+1, 1:basis.K)
+            #j_next = mod(j+1, 1:basis.K)
+            j_next = j+1
+            if j == 6
+                j_next = 1
+            end
+              
 
             for (site1,site2) in [(j,j_next),(j_next,j)]
                 if bra[site1]>0
@@ -45,7 +53,7 @@ function sparse_hamiltonian(basis::AbstractSzbasis)
 end
 
 
-
+  
 
 
 

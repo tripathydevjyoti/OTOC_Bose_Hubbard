@@ -14,9 +14,16 @@ function destroy(
     i::Int64
     )
     nket = copy(ket)
-    nket[i] -= 1
+    if nket[i]>0
+        nket[i] -= 1
+        
+    end
+    
+    
     return nket
 end
+
+
 
 function find_index(
     inp_state::Array{Int64,1},
@@ -35,3 +42,5 @@ function find_index(
 
     return index
 end
+
+export destroy
