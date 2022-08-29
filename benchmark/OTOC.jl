@@ -24,8 +24,8 @@ function bench(N, M, graph)
     otoc
 end
 
-M = 10
-N = 10
+M = 13
+N = 13
 graph = star_digraph(M);
 
 @time otoc = bench(N, M, graph);
