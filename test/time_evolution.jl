@@ -11,21 +11,26 @@
         num_total = occupation(T, B)
 
         times = [zero(T) + T(1/10) * i for i ∈ 1:100]
+        Z = zeros(T, length(times))
 
         for graph ∈ (path_graph(M), path_digraph(M), star_digraph(M), turan_graph(M, 2))
             avg = Complex{T}[]
             converged = Int[]
+            braket = Complex{T}[]
 
             H = BoseHubbard(B, J, U, graph).H
             for t ∈ times
                 Uket, info = exponentiate(H, -1im * t, ket, ishermitian=true)
                 push!(converged, info.converged)
                 push!(avg, dot(Uket, num_total * Uket))
+                push!(braket, dot(Uket, Uket))
             end
 
             @test all(converged .== 1)
-            @test isapprox(imag.(avg), zeros(T, length(times)), atol = 1E-14)
+            @test isapprox(imag.(avg), Z, atol = 1E-14)
             @test all(T(N) .≈ real.(avg))
+            @test all(one(T) .≈ real.(braket))
+            @test isapprox(imag.(braket), Z, atol = 1E-14)
         end
     end
 end
