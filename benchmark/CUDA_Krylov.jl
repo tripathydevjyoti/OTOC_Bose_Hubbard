@@ -13,7 +13,7 @@ function bench(N, M, graph)
     v = CUDA.rand(T, ham.basis.dim)
     H = CuSparseMatrixCSC(ham.H)
 
-    @time Ux, info = exponentiate(H, -1im, v)#, ishermitian=true)
+    @time Ux, info = exponentiate(H, -1im, v, ishermitian=true)
     println(typeof(Ux))
     @assert info.converged == 1
 end
