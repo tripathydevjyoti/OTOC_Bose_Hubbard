@@ -8,8 +8,8 @@ function bench(N, M, graph)
     T = Float64
     J, U = T(4/10), zero(T)
 
-    B = NBasis.([N, N-1, N-2], Ref(M))
-    H = BoseHubbard.(B, Ref(J), Ref(U), Ref(graph))
+    B = NBasis.([N, N-1, N-2], M)
+    H = BoseHubbard.(B, J, U, Ref(graph))
 
     #println("Dim: ", B.dim)
 

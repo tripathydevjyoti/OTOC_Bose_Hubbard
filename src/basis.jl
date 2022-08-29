@@ -92,9 +92,9 @@ $(TYPEDSIGNATURES)
 """
 $(TYPEDSIGNATURES)
 """
-function dense(::Type{T}, ket::Vector{Int}, B::S) where {T <: Number, S <: AbstractBasis}
+function dense(::Type{T}, eket::Vector{Int}, B::S) where {T <: Number, S <: AbstractBasis}
     dket = zeros(T, B.dim)
-    dket[get_index(B, ket)] = one(T)
+    dket[get_index(B, eket)] = one(T)
     dket
 end
 dense(ket::Vector{Int}, B::T) where T <: AbstractBasis = dense(Float64, ket, B)

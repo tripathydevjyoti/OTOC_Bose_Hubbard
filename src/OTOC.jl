@@ -5,8 +5,8 @@ export
 $(TYPEDSIGNATURES)
 """
 function OTOC(
-    ham::S, i::Int, j::Int, state::State, time::T; kwargs=()
-) where {S <: BoseHubbard, T <: Real}
+    ham::BoseHubbard{S}, i::Int, j::Int, state::State, time::T; kwargs=()
+) where {S, T <: Real}
     τ = -1im * time
 
     # 1. compute |x> := V * a_j * U * a_i * ket
