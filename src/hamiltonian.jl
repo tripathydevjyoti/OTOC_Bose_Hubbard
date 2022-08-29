@@ -5,7 +5,7 @@ export
 $(TYPEDSIGNATURES)
 """
 struct BoseHubbard{T <: Real}
-    basis
+    basis::Union{Basis, NBasis, Vector{NBasis}}
     lattice::LabelledGraph
     H::SparseMatrixCSC{T, Int64}
 end
