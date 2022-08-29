@@ -8,14 +8,14 @@ function bench(N, M, graph)
     T = Float64
     J, U = T(4/10), zero(T)
 
-    B = NBasis([N, N-1, N-2], M)
-    H = BoseHubbard(B, J, U, graph)
+    B = NBasis.([N, N-1, N-2], Ref(M))
+    H = BoseHubbard.(B, Ref(J), Ref(U), Ref(graph))
 
-    println("Dim: ", B.dim)
+    #println("Dim: ", B.dim)
 
     times = [zero(T) + T(1/10) * i for i ∈ 1:100]
 
-    state = State(rand(T, K), H.basis.eig_vecs[1:K])
+    state = State(rand(T, K), H[1].basis.eig_vecs[1:K])
     otoc = []
     i, j = 1, 2
     for t ∈ times
@@ -24,8 +24,8 @@ function bench(N, M, graph)
     otoc
 end
 
-M = 8
-N = 8
+M = 10
+N = 10
 graph = star_digraph(M);
 
 @time otoc = bench(N, M, graph);
