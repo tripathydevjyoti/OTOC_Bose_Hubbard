@@ -4,9 +4,10 @@ export
 """
 $(TYPEDSIGNATURES)
 """
-function expv(τ::Number, c::Number, ham::BoseHubbard{T}, ket::State) where T
+function expv(τ::Real, c::Number, ham::BoseHubbard{T}, state::State) where T
     f(du, u, p, t) = mul!(du, c .* ham.H, u)
-    sol = solve(ODEProblem(f, dense(ket, ham.basis), τ), Tsit5())
+    ket = convert.(Complex{T}, dense(state, ham.basis))
+    sol = solve(ODEProblem(f, ket, τ), Tsit5())
     sol(τ)
 end
 
