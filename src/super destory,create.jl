@@ -10,10 +10,9 @@ function super_destroy(
     vecs = Vector(undef, n)
     for k in 1:n
         ket = basis[k]
-        println(ket,Cₙ[k])
         vecs[k] = ( ket[site] > 0 && Cₙ[k] > 0.001) ? destroy(ket, site) : 0
     end
-    print(vecs)
+    
     Ψout = zeros(length(basis_des))
     pos = findall( !iszero, vecs)
     for i in pos
@@ -23,6 +22,33 @@ function super_destroy(
 
     return Ψout
 end
-
 export super_destroy
 
+
+function super_create(
+    Ψ ::Vector{Complex{T}},
+    basis ::AbstractSzbasis,
+    basis_cre ::AbstractSzbasis,
+    site ::Int
+) where T<:Real 
+
+    Cₙ = abs.(Ψ)
+    n = length(Cₙ)
+    vecs = Vector(undef, n)
+    for k in 1:n
+        ket = basis[k]
+        
+        vecs[k] = Cₙ[k] > 0.001 ? create(ket, site) : 0
+    end
+    
+    Ψout = zeros(length(basis_cre))
+    pos = findall( !iszero, vecs)
+    
+    for i in pos
+        index = find_index( vecs[i], basis_cre)
+        Ψout[index] = Cₙ[i]
+    end
+
+    return Ψout
+end
+export super_create
