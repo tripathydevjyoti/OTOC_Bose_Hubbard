@@ -25,5 +25,5 @@
     otoc_ode = OTOC_ODE(H, i, j, state, times)
 
     @test length(otoc) == length(otoc_ode) == num_points
-    @test isapprox(otoc, otoc_ode, atol = 1E-3)
+    @test isapprox(otoc, otoc_ode, atol = 1E-2)
 end

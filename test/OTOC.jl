@@ -1,7 +1,6 @@
 
 @testset "OTOC" begin
     num_points = 100
-    K = 4
     M, N = 3, 3
 
     T = Float64
@@ -18,21 +17,30 @@
     B3 = Basis(N, M)
     H3 = BoseHubbard(B3, J, U, graph)
 
-    times = [zero(T) + T(1/10) * i for i ∈ 1:num_points]
+    times = [zero(T) + T(1/10) * (i-1) for i ∈ 1:num_points]
 
-    state = State(rand(T, K), H2[1].basis.eig_vecs[1:K])
+    i, j = 1, 2
+    eigs = [[1, 1, 1], [1, 2, 0], [2, 1, 0]]
+    coeff = rand(T, length(eigs))
+    coeff ./= sqrt(sum(abs.(coeff) .^ 2))
+    state = State(coeff, eigs)
 
     otoc = []
     otoc_2 = []
     otoc_3 = []
 
-    i, j = 1, 2
     for t ∈ times
         push!(otoc, OTOC(H, i, j, state, t))
         push!(otoc_2, OTOC(H2, i, j, state, t))
         push!(otoc_3, OTOC(H3, i, j, state, t))
     end
 
+    ni_nj = getindex.(state.eig_vecs, i) .* getindex.(state.eig_vecs, j)
+
+    @test all(sum.(eigs) .== N)
     @test length(otoc) == length(otoc_2) == num_points
     @test otoc ≈ otoc_2 ≈ otoc_3
+    @test times[1] ≈ zero(T)
+    @test real(otoc[1]) ≈ sum(abs.(state.coeff) .^ 2 .* ni_nj)
+    @test imag(otoc[1]) ≈ zero(T)
 end
