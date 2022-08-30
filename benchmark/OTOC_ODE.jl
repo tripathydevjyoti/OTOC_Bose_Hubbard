@@ -14,12 +14,9 @@ function bench(N, M, graph)
     times = [zero(T) + T(1/10) * i for i ∈ 1:100]
 
     state = State(rand(T, K), H[1].basis.eig_vecs[1:K])
-    otoc = []
+
     i, j = 1, 2
-    for t ∈ times
-        push!(otoc, OTOC(H, i, j, state, t))
-    end
-    otoc
+    OTOC_ODE(H, i, j, state, times)
 end
 
 M = 10

@@ -4,8 +4,9 @@ export
 """
 $(TYPEDSIGNATURES)
 """
-function expv(τ::Number, K::CuSparseMatrixCSC, ket)
-    f(du, u, p, t) = mul!(du, K, u)
+function expv(τ::Real, c::Number, ham::BoseHubbard{T}, state::State) where T
+    f(du, u, p, t) = mul!(du, c .* ham.H, u)
+    ket = convert.(Complex{T}, dense(state, ham.basis))
     sol = solve(ODEProblem(f, ket, τ), Tsit5())
     sol(τ)
 end
