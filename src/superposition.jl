@@ -26,3 +26,19 @@ function superposition(
     return β,Ψₙ 
     
 end
+
+vec = [1,0,0,1]
+K= findall(x->x>0.001, vec)
+
+function super_destroy(
+    Ψ ::Vector{Complex{T}}
+    basis ::AbstractSzbasis
+    site ::Int
+)   where T<: Real
+
+    Cₙ = abs.(Ψ)
+    vecs = Vector(undef, length(Cₙ))
+
+
+    
+   

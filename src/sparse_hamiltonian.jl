@@ -5,13 +5,13 @@ using GraphPlot
 using SparseArrays: sparse
 using DocStringExtensions
 
-function sparse_hamiltonian(basis::AbstractSzbasis)
+function sparse_hamiltonian(basis::AbstractSzbasis,L:: Int)
     rows=Int64[]
     cols=Int64[]
     elements=Float64[]
     U=16
     t=4
-    L=6
+    
 
     for (i,bra) in enumerate(basis)
         #diagonal entries
