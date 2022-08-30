@@ -10,7 +10,6 @@ function expv(τ::Number, K::CuSparseMatrixCSC, ket)
     sol(τ)
 end
 
-
 function OTOC_CUDA(
     H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State, time::Vector{T}
 ) where {S, T <: Number}

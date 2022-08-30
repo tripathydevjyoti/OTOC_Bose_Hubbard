@@ -9,6 +9,7 @@ module OTOC_Bose_Hubbard
     using Combinatorics
     using DocStringExtensions
     using LinearAlgebra, MKL
+    using DifferentialEquations
 
     include("basis.jl")
     include("lattice.jl")
@@ -16,5 +17,8 @@ module OTOC_Bose_Hubbard
     include("conserved_operators.jl")
     include("hamiltonian.jl")
     include("OTOC.jl")
+
+    # experimental:
+    include("./experimental/OTOC_ODE.jl")
 
 end # modul

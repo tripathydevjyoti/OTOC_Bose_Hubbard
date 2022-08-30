@@ -16,7 +16,9 @@ my_tests = [
     "create_destroy.jl",
     "hamiltonian.jl",
     "time_evolution.jl",
-    "OTOC.jl"
+    "OTOC.jl",
+
+    "./experimental/OTOC_ODE.jl"
 ]
 
 for my_test ∈ my_tests
