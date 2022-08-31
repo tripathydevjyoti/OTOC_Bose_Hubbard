@@ -22,6 +22,8 @@ K = 10
 graph = star_digraph(M)
 
 bench(N, M, K, graph)
-@profile bench(N, M, K, graph)
+#@profile bench(N, M, K, graph)
+@time Profile.Allocs.@profile sample_rate = 1 bench(N, M, K, graph)
+PProf.Allocs.pprof()
 
-pprof(flamegraph(); webhost = "localhost", webport = 51456)
+#pprof(flamegraph(); webhost = "localhost", webport = 51456)
