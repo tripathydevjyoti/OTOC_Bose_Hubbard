@@ -3,18 +3,15 @@ using OTOC_Bose_Hubbard
 using LightGraphs
 using Plots
 
-function bench(N, M, graph)
-    K = 4
-
+function bench(N, M)
     T = Float64
     J, U = T(4/10), zero(T)
 
-    B = NBasis.([N, N-1, N-2], M)
-    H = BoseHubbard.(B, J, U, Ref(graph))
+    H = BoseHubbard.([N, N-1, N-2], M, J, U, :OBC)
 
-    times = [zero(T) + T(1/10) * i for i ∈ 1:100]
+    times = [zero(T) + T(1/10) * i for i ∈ 1:500]
 
-    state = State(rand(T, K), H[1].basis.eig_vecs[1:K])
+    state = State([one(T)], [fill(1, M)])
     otoc = []
     i, j = 1, 2
     for t ∈ times
@@ -25,9 +22,8 @@ end
 
 M = 8
 N = 8
-graph = star_digraph(M);
 
-times, otoc = bench(N, M, graph);
+times, otoc = bench(N, M);
 
-p = plot(times, real.(otoc), title="OTOC N=$N M=$M")
-#savefig(p, "./otoc.pdf")
+p = plot(times, abs.(otoc), title="OTOC N=$N M=$M")
+savefig(p, "./examples/otoc.pdf")
