@@ -27,11 +27,23 @@ include("super destory,create.jl")
 function OTOC_lattice(
     site1::Int64,
     site2::Int64,
-    time::Real
+    time::Real,
+    L::Int,
+    N::Int
 )
 
     kwargs = ()
-    Ψ₀=[1,1,1,1,1,1]
+
+    basis1 = Szbasis(L,N)
+    basis2 = Szbasis(L,N-1)
+    basis3 = Szbasis(L,N-2)
+
+
+    H1 = sparse_hamiltonian(basis1, N)
+    H2 = sparse_hamiltonian(basis2, N)
+    H3 = sparse_hamiltonian(basis3, N)
+    
+    Ψ₀=[1,1,1,1,1,1,1]
 
     Ψ₁ = destroy(Ψ₀,site1)
 
@@ -77,6 +89,32 @@ function OTOC_lattice(
 end
 
 export OTOC_lattice
+
+L = 7
+N = 7
+"""
+basis1 = Szbasis(L,N)
+
+basis2 = Szbasis(L,N-1)
+
+basis3 = Szbasis(L,N-2)
+
+
+H1 = sparse_hamiltonian(basis1, N)
+      
+H2 = sparse_hamiltonian(basis2, N)
+H3 = sparse_hamiltonian(basis3, N)
+"""
+t_vals = range(0,2,80)
+vals = []
+
+for t in t_vals
+    push!( vals, OTOC_lattice(7, 1, t, L, N))
+    print(t)
+end    
+
+scatter(t_vals,vals)
+
 end
 
 

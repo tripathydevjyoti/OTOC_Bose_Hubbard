@@ -14,10 +14,9 @@ function destroy(
     i::Int64
     )
     nket = copy(ket)
-    if nket[i]>0
-        nket[i] -= 1
+    nket[i] -= 1
         
-    end
+    
     
     
     return nket
@@ -44,3 +43,4 @@ function find_index(
 end
 
 export destroy
+export create

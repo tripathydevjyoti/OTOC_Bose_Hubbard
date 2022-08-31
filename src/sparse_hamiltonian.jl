@@ -28,7 +28,7 @@ function sparse_hamiltonian(basis::AbstractSzbasis,L:: Int)
         for j in 1:L
             #j_next = mod(j+1, 1:basis.K)
             j_next = j+1
-            if j == 6
+            if j == L
                 j_next = 1
             end
               
@@ -51,7 +51,10 @@ function sparse_hamiltonian(basis::AbstractSzbasis,L:: Int)
     sparse(rows,cols,elements,length(basis),length(basis))
 
 end
+export sparse_hamiltonian
 
+basis = Szbasis( 7,7)
+sparse_hamiltonian(basis, 7)
 
   
 
