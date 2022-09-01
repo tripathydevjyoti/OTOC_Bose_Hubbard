@@ -53,8 +53,9 @@ function sparse_hamiltonian(basis::AbstractSzbasis,L:: Int)
 end
 export sparse_hamiltonian
 
-basis = Szbasis( 7,7)
-sparse_hamiltonian(basis, 7)
+
+
+
 
   
 

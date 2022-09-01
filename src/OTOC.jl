@@ -40,9 +40,9 @@ function OTOC_lattice(
     basis3 = Szbasis(L,N-2)
 
 
-    H1 = sparse_hamiltonian(basis1, N)
-    H2 = sparse_hamiltonian(basis2, N)
-    H3 = sparse_hamiltonian(basis3, N)
+    H1 = sparse_hamiltonian(basis1, L)
+    H2 = sparse_hamiltonian(basis2, L)
+    H3 = sparse_hamiltonian(basis3, L)
     
     #Ψ₀=[1,1,1,1,1,1]
 
@@ -88,6 +88,8 @@ function OTOC_lattice(
        
 
 end
+
+
 
 export OTOC_lattice
 

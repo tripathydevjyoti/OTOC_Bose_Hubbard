@@ -1,3 +1,4 @@
+using JeszenszkiBasis
 function super_destroy(
     Ψ ::Vector{Complex{T}},
     basis ::AbstractSzbasis,
@@ -13,16 +14,18 @@ function super_destroy(
         vecs[k] = ( ket[site] > 0 && Cₙ[k] > 0.001) ? destroy(ket, site) : 0
     end
     
-    Ψout = zeros(length(basis_des))
+    Ψout = complex(zeros(length(basis_des)))
     pos = findall( !iszero, vecs)
     for i in pos
         index = find_index( vecs[i], basis_des)
-        Ψout[index] = Cₙ[i]
+        Ψout[index] = Ψ[i]
     end
 
     return Ψout
 end
 export super_destroy
+
+
 
 
 function super_create(
@@ -41,14 +44,16 @@ function super_create(
         vecs[k] = Cₙ[k] > 0.001 ? create(ket, site) : 0
     end
     
-    Ψout = zeros(length(basis_cre))
+    Ψout = complex(zeros(length(basis_cre)))
     pos = findall( !iszero, vecs)
     
     for i in pos
         index = find_index( vecs[i], basis_cre)
-        Ψout[index] = Cₙ[i]
+        Ψout[index] = Ψ[i]
     end
 
     return Ψout
 end
 export super_create
+
+
