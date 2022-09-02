@@ -23,17 +23,12 @@
     eigs = [[1, 1, 1], [1, 2, 0], [2, 1, 0]]
     coeff = rand(T, length(eigs))
     coeff ./= sqrt(sum(abs.(coeff) .^ 2))
+
     state = State(coeff, eigs)
 
-    otoc = []
-    otoc_2 = []
-    otoc_3 = []
-
-    for t ∈ times
-        push!(otoc, OTOC(H, i, j, state, t))
-        push!(otoc_2, OTOC(H2, i, j, state, t))
-        push!(otoc_3, OTOC(H3, i, j, state, t))
-    end
+    otoc = OTOC.(times, Ref(H), i, j, Ref(state))
+    otoc_2 = OTOC.(times, Ref(H2), i, j, Ref(state))
+    otoc_3 = OTOC.(times, Ref(H3), i, j, Ref(state))
 
     ni_nj = getindex.(state.eig_vecs, i) .* getindex.(state.eig_vecs, j)
 

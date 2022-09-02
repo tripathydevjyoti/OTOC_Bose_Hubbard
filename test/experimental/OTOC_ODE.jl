@@ -20,7 +20,7 @@
 
     i, j = 1, 2
     for t ∈ times
-        push!(otoc, OTOC(H, i, j, state, t))
+        push!(otoc, OTOC(t, H, i, j, state))
     end
     otoc_ode = OTOC_ODE(H, i, j, state, times)
 
