@@ -51,7 +51,7 @@ function OTOC_lattice(
     index = find_index(Ψ₁,basis2)
     track = zeros(length(basis2))
     track[index]=1
-    track = complex(track)
+    track = sqrt(Ψ₀[site1])*complex(track)
     
     
     time = -1im*time

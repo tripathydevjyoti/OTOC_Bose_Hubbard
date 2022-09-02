@@ -9,6 +9,7 @@ function create(
     return nket
 end
 
+
 function destroy(
     ket::AbstractArray{Int64,1},
     i::Int64

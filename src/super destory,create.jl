@@ -18,7 +18,7 @@ function super_destroy(
     pos = findall( !iszero, vecs)
     for i in pos
         index = find_index( vecs[i], basis_des)
-        Ψout[index] = Ψ[i]
+        Ψout[index] = sqrt( (vecs[i])[site] +1)*Ψ[i]
     end
 
     return Ψout
@@ -49,7 +49,7 @@ function super_create(
     
     for i in pos
         index = find_index( vecs[i], basis_cre)
-        Ψout[index] = Ψ[i]
+        Ψout[index] = sqrt( (vecs[i])[site] )*Ψ[i]
     end
 
     return Ψout
