@@ -12,7 +12,7 @@ end
 
 function BoseHubbard{T}(B, lattice::LabelledGraph) where T <: Real
     I, J, V = Int[], Int[], T[]
-    U = get_prop.(Ref(lattice), vertices(lattice), Ref(:U)) ./ T(2)
+    U = get_prop.(Ref(lattice), vertices(lattice), :U) ./ T(2)
 
     for (v, ket) ∈ enumerate(B.eig_vecs)
     # 1. interaction part:
@@ -23,12 +23,12 @@ function BoseHubbard{T}(B, lattice::LabelledGraph) where T <: Real
     # 2. kinetic part:
         for edge ∈ edges(lattice)
             i, j = src(edge), dst(edge)
-            if ket[i] > 0 && ket[j] != B.N
-                w = get_index(B, create(destroy(ket, i), j))
+            if ket[j] > 0 && ket[i] != B.N
+                w = get_index(B, create(destroy(ket, j), i))
                 Jij = get_prop(lattice, edge, :J)
-                push!(I, v, w)
-                push!(J, w, v)
-                val = -Jij * sqrt((ket[j] + 1) * ket[i])
+                push!(I, w, v)
+                push!(J, v, w)
+                val = -Jij * sqrt((ket[i] + 1) * ket[j])
                 push!(V, val, conj(val))
             end
         end
