@@ -15,6 +15,7 @@ KrylovKit = "0b1a1467-8014-51b9-945f-bf0ae24f4b77"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 
 [compat]
 CSV = "0.8"

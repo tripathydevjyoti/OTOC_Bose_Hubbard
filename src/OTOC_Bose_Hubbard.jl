@@ -10,6 +10,7 @@ module OTOC_Bose_Hubbard
     using DocStringExtensions
     using LinearAlgebra, MKL
     using DifferentialEquations
+    using PyCall
 
     include("basis.jl")
     include("lattice.jl")
