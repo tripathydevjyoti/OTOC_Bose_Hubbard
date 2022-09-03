@@ -7,10 +7,12 @@ using KrylovKit
 
 function bench(N, M, graph)
     T = Float64
-    B = NBasis([N, N-1, N-2], M)
-    ham = BoseHubbard(B, T(4/10), zero(T), graph)
+    S = Complex{T}
 
-    v = CUDA.rand(T, ham.basis.dim)
+    B = NBasis([N, N-1, N-2], M)
+    ham = BoseHubbard(B, S(4/10), zero(S), graph)
+
+    v = CUDA.rand(S, ham.basis.dim)
     @time H = CuSparseMatrixCSC(ham.H)
     println(typeof(H))
 
