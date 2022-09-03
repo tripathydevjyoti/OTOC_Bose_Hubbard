@@ -13,8 +13,8 @@ function expv(τ::Real, c::Number, H, ket)
 
     T = eltype(ket)
 
-    num_points = 100
-    Uket = CUDA.CuArray(ket)
+    num_points = 500
+    Uket = CUDA.CuArray(ket) # dense
     dt = c * τ / num_points
 
     A = dt .* H
@@ -36,9 +36,11 @@ function OTOC_ODE_CUDA(
 ) where {S, T <: Number}
     otoc = Complex{T}[]
 
-    HN = CUSPARSE.CuSparseMatrixCSC(H[1].H)
-    HN1 = CUSPARSE.CuSparseMatrixCSC(H[2].H)
-    HN2 = CUSPARSE.CuSparseMatrixCSC(H[3].H)
+    @time begin
+        HN = CUSPARSE.CuSparseMatrixCSC(H[1].H)
+        HN1 = CUSPARSE.CuSparseMatrixCSC(H[2].H)
+        HN2 = CUSPARSE.CuSparseMatrixCSC(H[3].H)
+    end
 
     ai_ket = dense(destroy(state, i), H[2].basis)
     ket = dense(state, H[1].basis)
@@ -56,6 +58,31 @@ function OTOC_ODE_CUDA(
 
         V_aj_U_ket = expv(τ, 1im, HN1, aj_U_ket) |> Array
         ai_V_aj_U_ket = dense(destroy(State(V_aj_U_ket, H[2].basis), i), H[3].basis)
+
+        # 3. OTOC: <y|x>
+        push!(otoc, dot(ai_V_aj_U_ket, V_aj_U_ai_ket))
+    end
+    otoc
+end
+
+function OTOC_ODE_CUDA(
+    time::Vector{T}, ham::BoseHubbard{S}, i::Int, j::Int, state::State
+) where {S, T <: Number}
+    otoc = Complex{T}[]
+
+    H = CUSPARSE.CuSparseMatrixCSC(ham.H)
+    ai = CUSPARSE.CuSparseMatrixCSC(annihilation(Complex{T}, ham.basis, i))
+    aj = CUSPARSE.CuSparseMatrixCSC(annihilation(Complex{T}, ham.basis, j))
+    ket = CUDA.CuArray(dense(state, ham.basis))
+
+    for τ ∈ time
+        # 1. |x> := V * a_j * U * a_i * ket
+        U_ai_ket = expv(τ, -1im, H, ai * ket)
+        V_aj_U_ai_ket = expv(τ, 1im, H, aj * U_ai_ket)
+
+        # 2. |y> := a_i * V * a_j * U * ket
+        U_ket = expv(τ, -1im, H, ket)
+        ai_V_aj_U_ket = ai * expv(τ, 1im, H, aj * U_ket)
 
         # 3. OTOC: <y|x>
         push!(otoc, dot(ai_V_aj_U_ket, V_aj_U_ai_ket))

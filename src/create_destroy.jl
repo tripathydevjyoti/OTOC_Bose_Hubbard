@@ -30,7 +30,7 @@ end
 """
 $(TYPEDSIGNATURES)
 """
-function annihilation(::Type{T}, B::Basis, i::Int) where T <: Real
+function annihilation(::Type{T}, B::S, i::Int) where {T <: Number, S <: AbstractBasis}
     n = length(B.eig_vecs)
     I, J, V = Int[], Int[], T[]
     for (v, ket) ∈ enumerate(B.eig_vecs)

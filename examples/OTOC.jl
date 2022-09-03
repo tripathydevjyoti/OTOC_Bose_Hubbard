@@ -19,7 +19,7 @@ end
 
 dim = (1, 2)
 time = 5.0
-num_points = 400
+num_points = 200
 times, otoc = bench(Float64, dim, time, num_points)
 
 p = plot(times, abs.(otoc), title="OTOC for hex $dim")
