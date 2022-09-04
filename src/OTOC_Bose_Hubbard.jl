@@ -11,7 +11,7 @@ module OTOC_Bose_Hubbard
     using LinearAlgebra, MKL
     using DifferentialEquations
     using PyCall
-    using CUDA
+    using CUDA, CUDA.CUSPARSE
 
 
     CUDA.allowscalar(false)

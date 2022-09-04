@@ -3,7 +3,8 @@ using OTOC_Bose_Hubbard
 using LightGraphs
 using Plots
 
-function bench(::Type{T}, dim::Dims, time::Real, num_points::Int) where T
+function bench(dim::Dims, time::Real, num_points::Int)
+    T = eltype(time)
     J, U = T(4), T(16)
 
     graph = hexagonal_graph(dim, J::T, U::T, :OBC)
@@ -14,13 +15,13 @@ function bench(::Type{T}, dim::Dims, time::Real, num_points::Int) where T
     times = zero(T) .+ T(time / num_points) .* collect(1:num_points)
     state = State([one(Complex{T})], [fill(1, M)])
 
-    times, OTOC_ODE_CUDA(times, H, 1, 2, state)
+    J .* times, OTOC(times, H, 1, 2, state, :GPU, 1E-6)
 end
 
 dim = (1, 2)
-time = 5.0
-num_points = 200
-@time times, otoc = bench(Float64, dim, time, num_points)
+time = 1.0
+num_points = 100
+@time Jtimes, otoc = bench(dim, time, num_points)
 
-p = plot(times, abs.(otoc), title="OTOC for hex $dim")
+p = plot(Jtimes, abs.(otoc), title="OTOC for hex $dim", label="|OTOC|")
 savefig(p, "./examples/otoc_cuda_hex$dim.pdf")

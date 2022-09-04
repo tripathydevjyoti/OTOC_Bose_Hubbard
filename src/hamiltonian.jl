@@ -50,3 +50,5 @@ end
 function BoseHubbard(N::IntOrVec, M::Int, J::T, U::T, graph) where T <: Number
     BoseHubbard(NBasis(N, M), J, U, graph)
 end
+
+Base.eltype(ham::BoseHubbard{T}) where {T} = T

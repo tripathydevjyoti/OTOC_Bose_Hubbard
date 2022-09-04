@@ -6,7 +6,7 @@ $(TYPEDSIGNATURES)
 """
 function expv(τ::Number, ham::BoseHubbard{T}, v::State; kwargs=()) where T
     U_dket, info = exponentiate(
-        ham.H, τ, dense(v, ham.basis), ishermitian=true, tol=1E-8
+        ham.H, τ, dense(v, ham.basis), ishermitian=true, tol=1E-6
     )
     @assert info.converged == 1
     U_dket
