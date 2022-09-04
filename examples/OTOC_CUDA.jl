@@ -15,11 +15,11 @@ function bench(dim::Dims, time::Real, num_points::Int)
     times = zero(T) .+ T(time / num_points) .* collect(1:num_points)
     state = State([one(Complex{T})], [fill(1, M)])
 
-    J .* times, OTOC(times, H, 1, 2, state, :GPU, 1E-6)
+    J .* times, OTOC(times, H, 1, 2, state, :GPU)
 end
 
 dim = (1, 2)
-time = 1.0
+time = 2.0
 num_points = 100
 @time Jtimes, otoc = bench(dim, time, num_points)
 

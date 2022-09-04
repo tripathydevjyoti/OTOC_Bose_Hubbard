@@ -18,7 +18,7 @@ my_tests = [
     "time_evolution.jl",
     "OTOC.jl",
 
-    "./experimental/OTOC_ODE.jl"
+    #"./experimental/OTOC_ODE.jl"
 ]
 
 for my_test ∈ my_tests
