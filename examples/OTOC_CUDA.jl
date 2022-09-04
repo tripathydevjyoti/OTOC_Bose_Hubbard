@@ -9,8 +9,7 @@ function bench(::Type{T}, dim::Dims, time::Real, num_points::Int) where T
     graph = hexagonal_graph(dim, J::T, U::T, :OBC)
     M = nv(graph)
     N = Int(M / 1)
-    #H = BoseHubbard.(NBasis.([N, N-1, N-2], M), Ref(graph))
-    H = BoseHubbard(NBasis(N, M), graph)
+    H = BoseHubbard(NBasis([N, N-1, N-2], M), graph)
 
     times = zero(T) .+ T(time / num_points) .* collect(1:num_points)
     state = State([one(Complex{T})], [fill(1, M)])

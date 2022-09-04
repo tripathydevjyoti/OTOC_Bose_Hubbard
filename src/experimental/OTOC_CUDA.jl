@@ -5,16 +5,10 @@ export
 $(TYPEDSIGNATURES)
 """
 function expv(τ::Real, c::Number, H, ket)
-    #=
-    f(du, u, p, t) = mul!(du, c .* H, u)
-    sol = solve(ODEProblem(f, CUDA.CuArray(ket), τ), Tsit5())
-    Uket = sol(τ)
-    =#
-
     T = eltype(ket)
 
     num_points = 500
-    Uket = CUDA.CuArray(ket) # dense
+    Uket = copy(ket)
     dt = c * τ / num_points
 
     A = dt .* H
@@ -28,6 +22,7 @@ function expv(τ::Real, c::Number, H, ket)
     Uket ./ norm(Uket)
 end
 
+#=
 """
 $(TYPEDSIGNATURES)
 """
@@ -64,20 +59,24 @@ function OTOC_ODE_CUDA(
     end
     otoc
 end
+=#
 
 function OTOC_ODE_CUDA(
-    time::Vector{T}, ham::BoseHubbard{S}, i::Int, j::Int, state::State
+    times::Vector{T}, ham::BoseHubbard{S}, i::Int, j::Int, state::State
 ) where {S, T <: Number}
-    otoc = Complex{T}[]
+    C = Complex{T}
 
     H = CUSPARSE.CuSparseMatrixCSC(ham.H)
-    ai = CUSPARSE.CuSparseMatrixCSC(annihilation(Complex{T}, ham.basis, i))
-    aj = CUSPARSE.CuSparseMatrixCSC(annihilation(Complex{T}, ham.basis, j))
-    ket = CUDA.CuArray(dense(state, ham.basis))
+    ai = CUSPARSE.CuSparseMatrixCSC(annihilation(C, ham.basis, i))
+    aj = CUSPARSE.CuSparseMatrixCSC(annihilation(C, ham.basis, j))
 
-    for τ ∈ time
+    ket = CUDA.CuArray(dense(state, ham.basis))
+    ai_ket = ai * ket
+
+    otoc = zeros(C, length(times))
+    for (i, τ) ∈ enumerate(times)
         # 1. |x> := V * a_j * U * a_i * ket
-        U_ai_ket = expv(τ, -1im, H, ai * ket)
+        U_ai_ket = expv(τ, -1im, H, ai_ket)
         V_aj_U_ai_ket = expv(τ, 1im, H, aj * U_ai_ket)
 
         # 2. |y> := a_i * V * a_j * U * ket
@@ -85,7 +84,7 @@ function OTOC_ODE_CUDA(
         ai_V_aj_U_ket = ai * expv(τ, 1im, H, aj * U_ket)
 
         # 3. OTOC: <y|x>
-        push!(otoc, dot(ai_V_aj_U_ket, V_aj_U_ai_ket))
+        otoc[i] = dot(ai_V_aj_U_ket, V_aj_U_ai_ket)
     end
     otoc
 end
