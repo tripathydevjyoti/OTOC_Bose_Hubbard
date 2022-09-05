@@ -3,24 +3,20 @@
 $(TYPEDSIGNATURES)
 """
 function expv(τ::Real, c::Complex, H, ket, ϵ=1e-6)
-#=
     A(du, u, p, t) = mul!(du, c .* H, u)
     ODE = ODEProblem(A, ket, (zero(eltype(τ)), τ))
     alg = RK4()
     sol = solve(ODE, alg, save_everystep=false)
     Uket = sol[end]
     Uket ./ norm(Uket)
-=#
+#=
     if τ ≈ zero(eltype(τ)) return ket end
     T = eltype(ket)
 
     δt = (ϵ / τ) ^ (1 / 3)
-    #=
     times = fill(δt, floor(Int, τ / δt))
     tot = sum(times)
     if !(tot ≈ τ) times = [times..., abs(tot - τ)] end
-    =#
-    times = fill(1e-5, 100)
 
     Uket = copy(ket)
     A = c .* H
@@ -33,6 +29,7 @@ function expv(τ::Real, c::Complex, H, ket, ϵ=1e-6)
         Uket ./= norm(Uket)
     end
     Uket
+=#
 end
 
 function OTOC(
