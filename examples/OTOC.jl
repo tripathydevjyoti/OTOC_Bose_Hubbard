@@ -19,9 +19,9 @@ function bench(dim::Dims, time::Real, num_points::Int)
 end
 
 dim = (1, 2)
-time = 2.0
+time = 5.0
 num_points = 100
 @time Jtimes, otoc = bench(dim, time, num_points)
 
-p = plot(Jtimes, abs.(otoc), title="OTOC for hex $dim")
+p = plot(Jtimes, abs.(otoc), title="OTOC for hex $dim", label="|OTOC|")
 savefig(p, "./examples/otoc_hex$dim.pdf")
