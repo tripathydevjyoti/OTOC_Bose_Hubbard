@@ -19,7 +19,7 @@ function bench(dim::Dims, time::Real, num_points::Int)
 end
 
 dim = (1, 2)
-time = 2.0
+time = 1.0
 num_points = 100
 @time Jtimes, otoc = bench(dim, time, num_points)
 
