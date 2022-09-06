@@ -58,7 +58,7 @@ t_vals = range(0,0.01,50)
 vals_comm =[]
 vals_func =[] 
 for t in t_vals
-    comm = abs(2*( (1-t.*t*j*j/2)^2 + j*j*t*t -1im*u*j*j*t*t*t + 1im*3*√2*t*t*t*u*j*j/2 + 3*√2*t*t*t*t*u*u*j*j/2 ))
+    comm = abs(2*( (1-t*t*j*j/2)^2 + j*j*t*t -1im*u*j*j*t*t*t + 1im*3*√2*t*t*t*u*j*j/2 + 3*√2*t*t*t*t*u*u*j*j/2 ))
     func= OTOC_lattice([1,2],2,1,t,2,3)
     push!(vals_comm, comm)
     push!(vals_func, func)
