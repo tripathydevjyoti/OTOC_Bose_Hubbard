@@ -1,10 +1,12 @@
 using .OTOC_example
 using Test
+using JeszenszkiBasis
 L =2
 N =3
-t = 1.0
+
 
 ψ₀ = [1,2]
+
 
 @testset "Compare OTOC function with analytics'" begin
     
@@ -47,4 +49,21 @@ t = 1.0
     @test isapprox(abs((m5*v)[3]), OTOC_lattice([1,2],2,1,1.0,L,N))
 
 end
+
+#Small time commutator expansion for N=2,M=3 model
+OTOC_lattice([1,2],2,1,0.003,L,N)
+u =16
+j =4
+t_vals = range(0,0.01,50)
+vals_comm =[]
+vals_func =[] 
+for t in t_vals
+    comm = abs(2*( (1-t.*t*j*j/2)^2 + j*j*t*t -1im*u*j*j*t*t*t + 1im*3*√2*t*t*t*u*j*j/2 + 3*√2*t*t*t*t*u*u*j*j/2 ))
+    func= OTOC_lattice([1,2],2,1,t,2,3)
+    push!(vals_comm, comm)
+    push!(vals_func, func)
+end
+
+plot(t_vals,abs.(vals_comm-vals_func))
+
 

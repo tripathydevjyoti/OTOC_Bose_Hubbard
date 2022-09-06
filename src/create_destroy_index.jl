@@ -43,5 +43,18 @@ function find_index(
     return index
 end
 
+function change_basis(
+    ket::Vector{Int64}, basis::AbstractSzbasis
+    )
+    index = find_index(ket, basis)
+    track = zeros(length(basis))
+    track[index] = 1
+
+    return complex(track)
+
+end
+
+export change_basis
 export destroy
 export create
+export find_index
