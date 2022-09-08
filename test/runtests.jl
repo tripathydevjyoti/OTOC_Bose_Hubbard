@@ -10,7 +10,6 @@ using Test
 sub_basis_dim(N::Int, M::Int) = Int(factorial(N + M − 1) / factorial(N) / factorial(M − 1))
 
 my_tests = [
-
     "basis.jl",
     "lattice.jl",
     "conserved_operators.jl",

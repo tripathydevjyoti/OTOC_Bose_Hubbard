@@ -1,6 +1,6 @@
 
 @testset "OTOC via ODE" begin
-    ϵ = 1e-6
+    ϵ = 1e-3
     T = Float64
 
     dim = (1, 1)
@@ -30,24 +30,21 @@
 
     if J ≈ U ≈ zero(T) all(otoc .≈ zero(Complex{T})) end
 
-    if J ≈ zero(T)
-        otoc_diag = Complex{T}[]
+    ket = dense(state, H[1].basis)
+    ai_ket = destroy(state, i)
 
-        ket = dense(state, H[1].basis)
-        ai_ket = destroy(state, i)
+    otoc_diag = Complex{T}[]
+    for τ ∈ times
+        U_ai_ket = exp(-1im * τ .* Array(H[2].H)) * dense(ai_ket, H[2].basis)
+        x = destroy(State(U_ai_ket, H[2].basis), j)
+        a = exp(1im * τ .* Array(H[3].H)) * dense(x, H[3].basis)
 
-        for τ ∈ times
-            U_ai_ket = exp(-1im * τ .* Array(H[2].H)) * dense(ai_ket, H[2].basis)
-            x = destroy(State(U_ai_ket, H[2].basis), j)
-            a = exp(1im * τ .* Array(H[3].H)) * dense(x, H[3].basis)
+        U_ket = exp(-1im * τ .* Array(H[1].H)) * ket
+        y = destroy(State(U_ket, H[1].basis), j)
+        V_aj_U_ket = exp(1im * τ .* Array(H[2].H)) * dense(y, H[2].basis)
+        b = dense(destroy(State(V_aj_U_ket, H[2].basis), i), H[3].basis)
 
-            U_ket = exp(-1im * τ .* Array(H[1].H)) * ket
-            y = destroy(State(U_ket, H[1].basis), j)
-            V_aj_U_ket = exp(1im * τ .* Array(H[2].H)) * dense(y, H[2].basis)
-            b = dense(destroy(State(V_aj_U_ket, H[2].basis), i), H[3].basis)
-
-            push!(otoc_diag, dot(b, a))
-        end
-        @test otoc ≈ otoc_diag
+        push!(otoc_diag, dot(b, a))
     end
+    @test otoc ≈ otoc_diag
 end

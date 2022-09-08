@@ -10,6 +10,8 @@
             @test conj(transpose(ham.H)) == ham.H
         end
     end
+
+    
 end
 
 @testset "Toy model with 2 sites and 1 particle" begin

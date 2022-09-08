@@ -10,6 +10,24 @@ struct BoseHubbard{T <: Number}
     H::SparseMatrixCSC{T, Int64}
 end
 
+#=
+function BoseHubbard{T}(B, lattice::LabelledGraph) where T <: Number
+    H = spzeros(T, B.dim, B.dim)
+    for edge ∈ edges(lattice)
+        J = get_prop(lattice, edge, :J)
+        H += J .* annihilation(T, B, dst(edge))' * annihilation(T, B, src(edge))
+    end
+    H += H'
+
+    for i ∈ vertices(lattice)
+        U = get_prop(lattice, i, :U) ./ T(2)
+        n = occupation(T, B, i)
+        H += U .* (n * n - n)
+    end
+    BoseHubbard{T}(B, lattice, H)
+end
+=#
+
 function BoseHubbard{T}(B, lattice::LabelledGraph) where T <: Number
     I, J, V = Int[], Int[], T[]
     U = get_prop.(Ref(lattice), vertices(lattice), :U) ./ T(2)
