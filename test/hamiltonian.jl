@@ -1,17 +1,16 @@
 @testset "Hamiltonian" begin
     M = N = 3
-    B = NBasis(N, M)
+    B = Basis(N, M)
 
     for T ∈ (Float16, Float32, Float64)
-        J, U = T(1), T(1/2)
+        J, U = T(1), T(0)
         for bndr ∈ (:OBC, :PBC)
-            ham = BoseHubbard(N, M, J, U, bndr)
-            @test size(ham.H) == (B.dim, B.dim)
+            ham = BoseHubbard{T}(B, chain(M, J, U, bndr)) #BoseHubbard(N, M, J, U, bndr)
+            #@test size(ham.H) == (B.dim, B.dim)
             @test conj(transpose(ham.H)) == ham.H
+            @test ham.H ≈ BoseHubbard{T}(B, chain(M, J, U, bndr), 0).H
         end
     end
-
-    
 end
 
 @testset "Toy model with 2 sites and 1 particle" begin

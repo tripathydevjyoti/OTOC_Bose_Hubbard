@@ -37,7 +37,7 @@ function annihilation(::Type{T}, B::S, i::Int) where {T <: Number, S <: Abstract
         if ket[i] > 0
             push!(J, v)
             push!(I, get_index(B, operate(ket, i, -1)))
-            push!(V, T(ket[i]) |> sqrt)
+            push!(V, sqrt(T(ket[i])))
         end
     end
     sparse(I, J, V, n, n)

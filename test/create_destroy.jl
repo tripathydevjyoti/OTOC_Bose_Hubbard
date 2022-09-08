@@ -15,8 +15,8 @@ end
 
     for T ∈ (Float16, Float32, Float64)
         for i ∈ 1:M, j ∈ 1:M
-            a_i = annihilation(T, B, i) |> Array
-            ap_j = creation(T, B, i) |> Array
+            a_i = annihilation(T, B, i)
+            ap_j = creation(T, B, i)
 
             @test tr(a_i) == tr(ap_j) ≈ zero(T)
             @test commutator(a_i, ap_j |> transpose) ≈ zeros(T, B.dim, B.dim)
@@ -26,7 +26,7 @@ end
 
             if i == j
                 @test a_i ≈ ap_j |> transpose
-                @test ap_j * a_i ≈ occupation(T, B, i) |> Array
+                @test ap_j * a_i ≈ occupation(T, B, i)
             else
                 @test commutator(a_i, ap_j) ≈ zeros(T, B.dim, B.dim)
             end
