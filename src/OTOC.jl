@@ -45,42 +45,42 @@ function OTOC_lattice(
     H2 = sparse_hamiltonian(basis2, L)
     H3 = sparse_hamiltonian(basis3, L)
     
-    #Ψ₀=[1,1,1,1,1,1]
+    
 
     Ψ₁ = destroy(Ψ₀,site1)
 
     track = sqrt(Ψ₀[site1])*change_basis(Ψ₁, basis2)
     
     
-    time = -1im*time
+    τ = -1im*time
     
-    Ψ₂, info = exponentiate(H2, time, track, ishermitian = true)
+    Ψ₂, info = exponentiate(H2, τ, track, ishermitian = true)
     @assert info.converged == 1
 
     Ψ₃ = super_destroy(Ψ₂, basis2, basis3, site2)
 
-    Ψ₄, info = exponentiate(H3, -time, Ψ₃, ishermitian = true, kwargs...)
+    Ψ₄, info = exponentiate(H3, -τ, Ψ₃, ishermitian = true, kwargs...)
     @assert info.converged == 1
 
 
     Ψ₅ = super_create(Ψ₄, basis3, basis2, site1)
     
-    Ψ₆, info = exponentiate(H2, time, Ψ₅, ishermitian = true, kwargs...)
+    Ψ₆, info = exponentiate(H2, τ , Ψ₅, ishermitian = true, kwargs...)
     @assert info.converged == 1
 
   
 
     Ψ₇ = super_create(Ψ₆, basis2, basis1, site2)
     
-    Ψ_fin, info = exponentiate(H1, -time, Ψ₇, ishermitian = true, kwargs...)
+    Ψ_fin, info = exponentiate(H1, -τ , Ψ₇, ishermitian = true, kwargs...)
     @assert info.converged == 1
 
 
     index = find_index(Ψ₀,basis1)
-   
+    track = change_basis(Ψ₀, basis1)
 
-    return abs(Ψ_fin[index])
-    #return real(dot(track, Ψ_fin)) 
+    #return abs(Ψ_fin[index])
+    return abs(dot(track, Ψ_fin)) 
     
        
 
@@ -120,36 +120,35 @@ function OTOC_graphlattice(
     track = sqrt(Ψ₀[site1])*change_basis(Ψ₁, basis2)
     
     
-    time = -1im*time
+    τ = -1im*time
     
-    Ψ₂, info = exponentiate(H2, time, track, ishermitian = true)
+    Ψ₂, info = exponentiate(H2, τ, track, ishermitian = true)
     @assert info.converged == 1
 
     Ψ₃ = super_destroy(Ψ₂, basis2, basis3, site2)
 
-    Ψ₄, info = exponentiate(H3, -time, Ψ₃, ishermitian = true, kwargs...)
+    Ψ₄, info = exponentiate(H3, -τ, Ψ₃, ishermitian = true, kwargs...)
     @assert info.converged == 1
 
 
     Ψ₅ = super_create(Ψ₄, basis3, basis2, site1)
     
-    Ψ₆, info = exponentiate(H2, time, Ψ₅, ishermitian = true, kwargs...)
+    Ψ₆, info = exponentiate(H2, τ , Ψ₅, ishermitian = true, kwargs...)
     @assert info.converged == 1
 
   
 
     Ψ₇ = super_create(Ψ₆, basis2, basis1, site2)
     
-    Ψ_fin, info = exponentiate(H1, -time, Ψ₇, ishermitian = true, kwargs...)
+    Ψ_fin, info = exponentiate(H1, -τ , Ψ₇, ishermitian = true, kwargs...)
     @assert info.converged == 1
 
-    
-    index = find_index(Ψ₀,basis1)
-    
-    
 
-    return abs(Ψ_fin[index])
-    #return real(dot(track, Ψ_fin)) 
+    index = find_index(Ψ₀,basis1)
+    track = change_basis(Ψ₀, basis1)
+
+    #return abs(Ψ_fin[index])
+    return abs(dot(track, Ψ_fin)) 
     
        
 
@@ -158,4 +157,5 @@ export OTOC_graphlattice
 
 
 end
+
 
