@@ -44,7 +44,8 @@ function find_index(
 end
 
 function change_basis(
-    ket::Vector{Int64}, basis::AbstractSzbasis
+    ket::Vector{Int64}, 
+    basis::AbstractSzbasis
     )
     index = find_index(ket, basis)
     track = zeros(length(basis))
