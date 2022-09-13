@@ -11,10 +11,10 @@ module OTOC_Bose_Hubbard
     using LinearAlgebra, MKL
     using DifferentialEquations
     using PyCall
-    using CUDA, CUDA.CUSPARSE
+    #using CUDA, CUDA.CUSPARSE
 
 
-    CUDA.allowscalar(false)
+    
 
     include("basis.jl")
     include("lattice.jl")
