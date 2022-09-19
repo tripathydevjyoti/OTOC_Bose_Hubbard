@@ -77,10 +77,10 @@ function OTOC_lattice(
 
 
     index = find_index(Ψ₀,basis1)
-    track = change_basis(Ψ₀, basis1)
+    #track = change_basis(Ψ₀, basis1)
 
-    #return abs(Ψ_fin[index])
-    return abs(dot(track, Ψ_fin)) 
+    return abs(Ψ_fin[index])
+    #return abs(dot(track, Ψ_fin)) 
     
        
 
@@ -145,10 +145,10 @@ function OTOC_graphlattice(
 
 
     index = find_index(Ψ₀,basis1)
-    track = change_basis(Ψ₀, basis1)
+    #track = change_basis(Ψ₀, basis1)
 
-    #return abs(Ψ_fin[index])
-    return abs(dot(track, Ψ_fin)) 
+    return abs(Ψ_fin[index])
+    #return abs(dot(track, Ψ_fin)) 
     
        
 
