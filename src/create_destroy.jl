@@ -23,8 +23,7 @@ function destroy(state::State{T}, i::Int) where T
         vecs[k] = ket[i] > 0 ? operate(ket, i, -1) : 0
     end
     K = findall(!iszero, vecs)
-    kets = vecs[K]
-    State(state.coeff[K] .* sqrt.(getindex.(kets, i) .+ 1), kets)
+    State(state.coeff[K] .* sqrt.(getindex.(state.eig_vecs[K], i)), vecs[K])
 end
 
 """
