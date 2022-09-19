@@ -21,26 +21,6 @@ function ode_expv(τ::Real, c::Number, ham::BoseHubbard{T}, state::State) where 
 
     Uket = sol[end]
     Uket ./ norm(Uket)
-
-    #=
-    if τ ≈ zero(eltype(τ)) return ket end
-    T = eltype(ket)
-    δt = (ϵ / τ) ^ (1 / 3)
-    times = fill(δt, floor(Int, τ / δt))
-    tot = sum(times)
-    if !(tot ≈ τ) times = [times..., abs(tot - τ)] end
-    Uket = copy(ket)
-    A = c .* H
-    for δt ∈ times
-        k1 = δt .* A * Uket
-        k2 = δt .* A * (Uket .+ T(1/2) .* k1)
-        k3 = δt .* A * (Uket .+ T(1/2) .* k2)
-        k4 = δt .* A * (Uket .+ k3)
-        Uket .+= (k1 .+ T(2) .* (k2 .+ k3) .+ k4) ./ T(6)
-        Uket ./= norm(Uket)
-    end
-    Uket
-    =#
 end
 
 """
