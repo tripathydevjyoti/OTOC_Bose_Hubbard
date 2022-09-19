@@ -39,11 +39,11 @@ dim = (1, 1)
 time = 1.0
 num_points = 50
 
-ij = (6, 1)
+ij = (4, 3)
 @time Jtimes, otoc = bench(dim, time, ij, num_points)
 p = plot(Jtimes, abs.(otoc), title="OTOC for hex $dim", label="$ij")
 
-ij = (2, 1)
+ij = (4, 5)
 @time Jtimes, otoc = bench(dim, time, ij, num_points)
 plot!(p, Jtimes, abs.(otoc), label="$ij")
 
