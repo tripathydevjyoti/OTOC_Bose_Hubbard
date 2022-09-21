@@ -56,14 +56,11 @@ function hexagonal_graph(dim::Dims, J::T, U::T, bndr::Symbol) where T <: Real
 
     nx = pyimport("networkx")
     hg = nx.generators.lattice.hexagonal_lattice_graph(
-        dim..., periodic =false # bndr == :PBC ? true : false
+        dim..., periodic = bndr == :PBC ? true : false
     )
     map = Dict(v => i for (i, v) ∈ enumerate(hg.nodes))
     inst = Dict((map[v], map[w]) => J for (v, w) ∈ hg.edges)
     push!(inst, ((map[v], map[v]) => U for v ∈ hg.nodes)...)
 
-    println(hg.nodes)
-    println(hg.edges)
-    println(inst)
     lattice(T, inst)
 end
