@@ -5,12 +5,14 @@ using Plots
 M, N = 4, 4
 J = 1.0
 
+# this is just bad -> we do not want to go through the dense Hamiltonian
 function energy_levels(U::Real)
     graph = chain(M, J, U, :PBC)
     Ham = BoseHubbard(N, M, J, U, graph).H
     eigen(Array(Ham)).values
 end
 
+# Again, this is not the way to go about this ...
 function LE(t::Real)
     Ui, Uf = 0.0, 1.0
     graphi = chain(M, J, Ui,:PBC)
