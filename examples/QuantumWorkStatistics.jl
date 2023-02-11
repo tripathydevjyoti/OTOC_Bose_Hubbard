@@ -22,7 +22,7 @@ function LE_1D(t::Float64)
     state_f=expv(-1im*t,hamiltonian,state_i) #final state
     ket=dense(state_i,NBasis(N,M))
 
-    le=conj(dot(ket,state_f)) #complex conjugate of O(t)
+    le=abs(dot(ket,state_f))^2 #loschmidt echo
     le
 end
 
