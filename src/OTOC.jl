@@ -6,9 +6,7 @@ export
 $(TYPEDSIGNATURES)
 """
 function expv(τ::Number, ham::BoseHubbard{T}, v::State; kwargs=()) where T
-    U_dket, info = exponentiate(
-        ham.H, τ, dense(v, ham.basis), ishermitian=true, tol=1E-8
-    )
+    U_dket, info = exponentiate(ham.H, τ, dense(v, ham.basis), ishermitian=true, tol=1E-8)
     @assert info.converged == 1
     U_dket
 end
@@ -16,9 +14,7 @@ end
 """
 $(TYPEDSIGNATURES)
 """
-function OTOC(
-    time::T, H::BoseHubbard{S}, i::Int, j::Int, state::State; kwargs=()
-) where {S, T <: Real}
+function OTOC(time::T, H::BoseHubbard{S}, i::Int, j::Int, state::State; kwargs=()) where {S, T <: Real}
     τ = -1im * time
 
     # 1. compute |x> := V * a_j * U * a_i * ket
@@ -34,9 +30,7 @@ function OTOC(
     dot(ai_V_aj_U_ket, V_aj_U_ai_ket)
 end
 
-function OTOC(
-    time::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State; kwargs=()
-) where {S, T <: Real}
+function OTOC(time::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State; kwargs=()) where {S, T <: Real}
     τ = -1im * time
 
     # 1. compute |x> := V * a_j * U * a_i * ket

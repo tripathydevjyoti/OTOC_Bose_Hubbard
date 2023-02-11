@@ -8,7 +8,6 @@ using FFTW
 
 # compute Loschmidt Echo and Work distribution for the BH model with unit filling
 
-
 function LE_1D(t::Float64)
 
     T = eltype(t)
