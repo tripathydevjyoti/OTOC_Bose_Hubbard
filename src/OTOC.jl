@@ -1,5 +1,6 @@
 export
-    OTOC
+    OTOC,
+    expv
 
 """
 $(TYPEDSIGNATURES)
