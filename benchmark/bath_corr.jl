@@ -53,5 +53,5 @@ time1 =0.25
 time2 = 0.1
 num_points = 40
 
-@time bath_corr11 = bath_bartek(dim,time1,time2,num_points,4,1)
+@time bath_corr11 = bath_bartek2(dim,time1,time2,num_points,1,1)
 
