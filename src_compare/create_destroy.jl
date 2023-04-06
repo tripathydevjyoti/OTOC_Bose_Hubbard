@@ -27,17 +27,6 @@ function destroy(state::State{T}, i::Int) where T
     State(state.coeff[K] .* sqrt.(getindex.(kets, i) .+ 1), kets)
 end
 
-function create(state::State{T}, i::Int) where T
-    n = length(state.eig_vecs)
-    vecs = Vector(undef, n)
-    Threads.@threads for k ∈ 1:n
-        ket = state.eig_vecs[k]
-        vecs[k] =  operate(ket, i, +1)
-    end
-    K = findall(!iszero, vecs)
-    kets = vecs[K]
-    State(state.coeff[K] .* sqrt.(getindex.(kets, i) .+ 1), kets)
-end
 
 """
 $(TYPEDSIGNATURES)

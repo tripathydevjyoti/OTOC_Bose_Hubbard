@@ -18,18 +18,20 @@ function otoc_bartek(dim::Dims, time::Real, num_points::Int, site1::Int, site2::
     N = Int(M / 1)
     H = BoseHubbard.(NBasis.([N, N-1, N-2], M), Ref(graph))
     #times = zero(T) .+ T(time / num_points) .* collect(1:num_points)
-    times = range(0, 1.25, 50)
+    times = range(0,0.5,40)
     state = State([one(T)], [fill(1, M)])
-    J .* times, OTOC.(times, Ref(H), site1, site2, Ref(state))
+    OTOC.(times, Ref(H), site1, site2, Ref(state))
 end    
 
-dim = (1, 2)
-time = 0.25
+dim = (1, 1)
+time = 0.5
 num_points = 40
-Jtimes, otoc = otoc_bartek(dim, time, num_points, 6,5)
+@time otoc = otoc_bartek(dim, time, num_points, 1,4)
+abs.(otoc)
+Jtimes = range(0,2.0,40)
 plot(Jtimes, abs.(otoc))
 np = pyimport("numpy")
-np.save("otoc_1hex_flake_1_4",otoc)
+np.save("otoc_1hex_mi",otoc)
 #print(otoc)
 
 """
@@ -76,6 +78,22 @@ push!(inst, ((map[v], map[v]) => U for v ∈ hg.nodes)...)
 
 
 
+"""
+
+"""
+function hexagonal_graph(dim::Dims, J::T, U::T, bndr::Symbol) where T <: Real
+    @assert bndr ∈ (:OBC, :PBC)
+
+    nx = pyimport("networkx")
+    hg = nx.generators.lattice.hexagonal_lattice_graph(
+        dim..., periodic = bndr == :PBC ? true : false
+    )
+    map = Dict(v => i for (i, v) ∈ enumerate(hg.nodes))
+    inst = Dict((map[v], map[w]) => J for (v, w) ∈ hg.edges)
+    push!(inst, ((map[v], map[v]) => U for v ∈ hg.nodes)...)
+
+    lattice(T, inst)
+end
 """
 
 """
