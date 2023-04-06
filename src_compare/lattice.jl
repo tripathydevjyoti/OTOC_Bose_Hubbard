@@ -56,6 +56,8 @@ $(TYPEDSIGNATURES)
 
 
 
+
+
 function hexagonal_graph(dim::Dims, J::T, U::T, bndr::Symbol) where T <: Real
     @assert bndr ∈ (:OBC, :PBC)
 
@@ -70,5 +72,9 @@ function hexagonal_graph(dim::Dims, J::T, U::T, bndr::Symbol) where T <: Real
 
     lattice(T, inst)
 end
+
+
+
+
 
 

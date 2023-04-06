@@ -28,7 +28,7 @@ function bath_bartek(dim::Dims, time1::Real ,time2::Real, num_points::Int, site1
     #times = zero(T) .+ T(time / num_points) .* collect(1:num_points)
     #times = range(0,1.2,50)
     state = State([one(T)], [fill(1, M)])
-    bath(time1, time2, Ref(H), site1, site2, Ref(state))
+    bath(time1, time2, H, site1, site2, state)
 end  
 
 function bath_bartek2(dim::Dims, time1::Real, time2::Real, num_points::Int, site1::Int, site2::Int)
@@ -43,7 +43,7 @@ function bath_bartek2(dim::Dims, time1::Real, time2::Real, num_points::Int, site
     #times = range(0,1.2,50)
     state = State([one(T)], [fill(1, M)])
     
-    bath2(time1, time2, Ref(H), site1, site2, Ref(state))
+    bath2(time1, time2, H, site1, site2, state)
 end   
 
 
@@ -54,3 +54,4 @@ time2 = 0.1
 num_points = 40
 
 @time bath_corr11 = bath_bartek(dim,time1,time2,num_points,4,1)
+
