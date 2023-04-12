@@ -1,7 +1,8 @@
 export
     lattice,
     chain,
-    hexagonal_graph
+    hexagonal_graph,
+    system_graph
 
 const Instance = Union{String, Dict}
 
@@ -65,6 +66,21 @@ function hexagonal_graph(dim::Dims, J::T, U::T, bndr::Symbol) where T <: Real
     hg  = nx.Graph()
     hg.add_nodes_from([1,2,3,4,5,6,7,8])
     hg.add_edges_from([(1,2),(2,3),(4,5),(5,6),(6,7),(7,8)])
+
+    map = Dict(v => i for (i, v) ∈ enumerate(hg.nodes))
+    inst = Dict((map[v], map[w]) => J for (v, w) ∈ hg.edges)
+    push!(inst, ((map[v], map[v]) => U for v ∈ hg.nodes)...)
+
+    lattice(T, inst)
+end
+
+function system_graph(dim::Dims, J::T, U::T, bndr::Symbol) where T <: Real
+    @assert bndr ∈ (:OBC, :PBC)
+
+    nx = pyimport("networkx")
+    hg  = nx.Graph()
+    hg.add_nodes_from([1,2])
+    hg.add_edges_from([(1,2)])
 
     map = Dict(v => i for (i, v) ∈ enumerate(hg.nodes))
     inst = Dict((map[v], map[w]) => J for (v, w) ∈ hg.edges)

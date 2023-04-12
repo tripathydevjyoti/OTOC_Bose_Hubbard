@@ -21,7 +21,9 @@ module OTOC_Bose_Hubbard
     include("create_destroy.jl")
     include("conserved_operators.jl")
     include("hamiltonian.jl")
-    include("OTOC.jl")
+    include("bath.jl")
+    include("dissipator.jl")
+   
 
     # experimental:
     include("./experimental/OTOC_ODE.jl")

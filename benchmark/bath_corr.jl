@@ -44,7 +44,22 @@ function bath_bartek2(dim::Dims, time1::Real, time2::Real, num_points::Int, site
     state = State([one(T)], [fill(1, M)])
     
     bath2(time1, time2, H, site1, site2, state)
-end   
+end
+
+function dissipator(dim::Dims, time1::Real, time2::Real, num_points::Int, site1::Int, site2::Int)
+    T = eltype(time1)
+    J, U = T(0), T(16)
+    graph = system_graph(dim, J::T, U::T, :OBC)
+    #graph = hex_graph(T(4),T(16))
+    M = nv(graph)
+    N = Int(M / 1)
+    H = BoseHubbard.(NBasis.([N+1, N, N-1], M), Ref(graph))
+    #times = zero(T) .+ T(time / num_points) .* collect(1:num_points)
+    #times = range(0,1.2,50)
+    state = State([one(T)], [fill(1, M)])
+    
+    diss_one(time1, time2, H, site1, site2, state) + diss_two(time1, time2, H, site1, site2, state)
+end
 
 
 
