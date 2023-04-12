@@ -19,7 +19,7 @@ function diss_one(
     τ = -1im * time
     s = -1im * stime
 
-    ket_state = State(U_ket,H[2].basis)
+    ket_state = State(ket,H[2].basis)
     U_ket = expv(τ, H[2], ket_state)
     ai_dag_U_ket = create(State(U_ket,H[2].basis),i)
     Udag_ai_dag_U_ket = expv(-τ, H[1], ai_dag_U_ket )
