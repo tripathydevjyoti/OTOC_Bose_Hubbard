@@ -74,5 +74,6 @@ rho_t = [1 0 0 0;
          0 0 0 0;
          0 0 0 0]
 
-@time bath_corr11 = bath_bartek(dim,time1,time2,num_points,1,1)
+@time dissipator_11 = dissipator(dim,time1,time2,num_points,1,1,rho_t)
+
 
