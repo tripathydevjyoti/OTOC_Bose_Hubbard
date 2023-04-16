@@ -1,6 +1,8 @@
 export
-    diss_one,
-    diss_two
+    diss_one_cre,
+    diss_one_des,
+    diss_two_cre,
+    diss_two_des
 
 
 
@@ -13,42 +15,79 @@ function expv(τ::Number, ham::BoseHubbard{T}, v::State; kwargs=()) where T
 end    
    
 
-function diss_one(
+function diss_one_cre(
     time::T, stime::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, bra::State, ket::State, rho_t; kwargs=()
 ) where {S, T <: Real}
     τ = -1im * time
     s = -1im * stime
 
-    ket_state = State(ket,H[2].basis)
-    U_ket = expv(τ, H[2], ket_state)
+    
+    U_ket = expv(τ, H[2], ket)
     ai_dag_U_ket = create(State(U_ket,H[2].basis),i)
     Udag_ai_dag_U_ket = expv(-τ, H[1], ai_dag_U_ket )
-    mid_ket = rho_t * Udag_ai_dag_U_ket
+    mid_ket = State(rho_t * Udag_ai_dag_U_ket, H[1].basis)
 
     U_mid_ket = expv(τ-s, H[1], mid_ket)
     Udag_aj_U_mid_ket = expv(s-τ, H[2], destroy(State(U_mid_ket, H[1].basis),j) )
 
-    dot(bra, Udag_aj_U_mid_ket)
+    dot(dense(bra, H[2].basis), Udag_aj_U_mid_ket)
 
 end 
 
-function diss_two(
+function diss_one_des(
+    time::T, stime::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, bra::State, ket::State, rho_t; kwargs=()
+) where {S, T <: Real}
+    τ = -1im * time
+    s = -1im * stime
+
+    
+    U_ket = expv(τ, H[2], ket)
+    ai_U_ket = destroy(State(U_ket,H[2].basis),i)
+    Udag_ai_U_ket = expv(-τ, H[3], ai_U_ket )
+    mid_ket = State(rho_t * Udag_ai_U_ket, H[3].basis)
+
+    U_mid_ket = expv(τ-s, H[3], mid_ket)
+    Udag_aj_dag_U_mid_ket = expv(s-τ, H[2], create(State(U_mid_ket, H[3].basis),j) )
+
+    dot(dense(bra, H[2].basis), Udag_aj_dag_U_mid_ket)
+
+end 
+
+function diss_two_cre(
     time::T, stime::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, bra::State, ket::State, rho_t; kwargs=()
 ) where {S, T <: Real}
     τ = -1im * time
     s = -1im * stime
 
 
-    rho_ket = rho_t * ket
+    rho_ket = State(rho_t * dense(ket,H[2].basis), H[2].basis)
     U_rho_ket = expv(τ-s, H[2], rho_ket)
-    U_dag_aj_U_rho_ket =expv(s, H[3], destroy(State(U_rho_ket, H[2].basis),j) )
+    U_dag_aj_U_rho_ket =expv(-s, H[3], destroy(State(U_rho_ket, H[2].basis),j) )
     mix_U_state = U_dag_aj_U_rho_ket
     Udag_ai_dag_mix_U_state = expv(-τ, H[2], create(State(mix_U_state, H[3].basis),i) )
 
 
-    dot(bra, Udag_ai_dag_mix_U_state)
+    dot(dense(bra,H[2].basis), Udag_ai_dag_mix_U_state)
 
-end    
+end 
+
+function diss_two_des(
+    time::T, stime::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, bra::State, ket::State, rho_t; kwargs=()
+) where {S, T <: Real}
+    τ = -1im * time
+    s = -1im * stime
+
+
+    rho_ket = State(rho_t * dense(ket,H[2].basis), H[2].basis)
+    U_rho_ket = expv(τ-s, H[2], rho_ket)
+    U_dag_aj_dag_U_rho_ket =expv(-s, H[1], create(State(U_rho_ket, H[2].basis),j) )
+    mix_U_state = U_dag_aj_dag_U_rho_ket
+    Udag_ai_mix_U_state = expv(-τ, H[1], destroy(State(mix_U_state, H[3].basis),i) )
+
+
+    dot(dense(bra,H[2].basis), Udag_ai_mix_U_state)
+
+end 
 
 
 

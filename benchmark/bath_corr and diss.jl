@@ -11,6 +11,14 @@ using PyCall
 using KrylovKit
 using LinearAlgebra
 
+function expv(τ::Number, ham::BoseHubbard{T}, v::State; kwargs=()) where T
+    U_dket, info = exponentiate(
+    ham.H, τ, dense(v, ham.basis), ishermitian=true, tol=1E-8
+    )
+    @assert info.converged == 1
+    U_dket
+end
+
 
 
 
@@ -46,10 +54,10 @@ function bath_bartek2(dim::Dims, time1::Real, time2::Real, num_points::Int, site
     bath2(time1, time2, H, site1, site2, state)
 end
 
-function dissipator(dim::Dims, time1::Real, time2::Real, site1::Int, site2::Int, den_mat)
+function dissipator(time1::Real, time2::Real, site1::Int, site2::Int, den_mat)
     T = eltype(time1)
     J, U = T(0), T(16)
-    graph = system_graph(dim, J::T, U::T, :OBC)
+    graph = system_graph(J::T, U::T, :OBC)
     #graph = hex_graph(T(4),T(16))
     M = nv(graph)
     N = Int(M / 1)
@@ -65,7 +73,7 @@ end
 
 
 dim = (1, 1)
-time1 =0.25
+time1 =0.3
 time2 = 0.1
 num_points = 40
 
@@ -74,6 +82,7 @@ rho_t = [1 0 0 0;
          0 0 0 0;
          0 0 0 0]
 
-@time dissipator_11 = dissipator(dim,time1,time2,num_points,1,1,rho_t)
+@time dissipator_11 = dissipator(time1,time2,1,1,rho_t)
+
 
 

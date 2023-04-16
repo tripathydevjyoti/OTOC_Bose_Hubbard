@@ -74,7 +74,7 @@ function hexagonal_graph(dim::Dims, J::T, U::T, bndr::Symbol) where T <: Real
     lattice(T, inst)
 end
 
-function system_graph(dim::Dims, J::T, U::T, bndr::Symbol) where T <: Real
+function system_graph(J::T, U::T, bndr::Symbol) where T <: Real
     @assert bndr ∈ (:OBC, :PBC)
 
     nx = pyimport("networkx")
