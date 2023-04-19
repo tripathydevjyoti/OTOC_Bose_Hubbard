@@ -59,7 +59,7 @@ $(TYPEDSIGNATURES)
 
 
 
-function hexagonal_graph(dim::Dims, J::T, U::T, bndr::Symbol) where T <: Real
+function hexagonal_graph( J::T, U::T, bndr::Symbol) where T <: Real
     @assert bndr ∈ (:OBC, :PBC)
 
     nx = pyimport("networkx")

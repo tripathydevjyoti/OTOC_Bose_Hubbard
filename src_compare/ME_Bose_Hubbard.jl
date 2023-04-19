@@ -1,5 +1,5 @@
 
-module OTOC_Bose_Hubbard
+module ME_Bose_Hubbard
     using LabelledGraphs
     using LightGraphs
     using MetaGraphs
@@ -11,7 +11,7 @@ module OTOC_Bose_Hubbard
     using LinearAlgebra, MKL
     using DifferentialEquations
     using PyCall
-    #using CUDA, CUDA.CUSPARSE
+    
 
 
     
@@ -25,9 +25,7 @@ module OTOC_Bose_Hubbard
     include("dissipator.jl")
    
 
-    # experimental:
-    include("./experimental/OTOC_ODE.jl")
-    include("./experimental/OTOC_CUDA.jl")
+    
 
 
 end # modul
