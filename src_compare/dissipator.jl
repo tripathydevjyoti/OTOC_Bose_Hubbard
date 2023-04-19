@@ -80,11 +80,13 @@ function diss_two_des(
 
     rho_ket = State(rho_t * dense(ket,H[2].basis), H[2].basis)
     U_rho_ket = expv(τ-s, H[2], rho_ket)
+    i=1
+    j=2
     U_dag_aj_dag_U_rho_ket =expv(-s, H[1], create(State(U_rho_ket, H[2].basis),j) )
     mix_U_state = U_dag_aj_dag_U_rho_ket
-    Udag_ai_mix_U_state = expv(-τ, H[1], destroy(State(mix_U_state, H[3].basis),i) )
-
-
+    Udag_ai_mix_U_state = expv(-τ, H[2], destroy(State(mix_U_state, H[1].basis),i) )
+    
+    
     dot(dense(bra,H[2].basis), Udag_ai_mix_U_state)
 
 end 

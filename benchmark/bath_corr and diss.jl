@@ -11,20 +11,14 @@ using PyCall
 using KrylovKit
 using LinearAlgebra
 
-function expv(τ::Number, ham::BoseHubbard{T}, v::State; kwargs=()) where T
-    U_dket, info = exponentiate(
-    ham.H, τ, dense(v, ham.basis), ishermitian=true, tol=1E-8
-    )
-    @assert info.converged == 1
-    U_dket
-end
 
 
 
 
 
 
-function bath_bartek(dim::Dims, time1::Real ,time2::Real, num_points::Int, site1::Int, site2::Int)
+
+function bath_bartek(dim::Dims, time1::Real ,time2::Real, site1::Int, site2::Int)
     T = eltype(time1)
 
     J, U = T(4), T(16)
@@ -39,7 +33,7 @@ function bath_bartek(dim::Dims, time1::Real ,time2::Real, num_points::Int, site1
     bath(time1, time2, H, site1, site2, state)
 end  
 
-function bath_bartek2(dim::Dims, time1::Real, time2::Real, num_points::Int, site1::Int, site2::Int)
+function bath_bartek2(dim::Dims, time1::Real, time2::Real, site1::Int, site2::Int)
     T = eltype(time1)
     J, U = T(4), T(16)
     graph = hexagonal_graph(dim, J::T, U::T, :OBC)
@@ -67,7 +61,7 @@ function dissipator(time1::Real, time2::Real, site1::Int, site2::Int, den_mat)
     state1= State([one(T)], [fill(1, M)])
     state2= State([one(T)], [fill(1, M)])
     
-    diss_one(time1, time2, H, site1, site2, state1, state2,den_mat)
+    diss_one_cre(time1, time2, H, site1, site2, state1, state2,den_mat)
 end
 
 
@@ -83,6 +77,18 @@ rho_t = [1 0 0 0;
          0 0 0 0]
 
 @time dissipator_11 = dissipator(time1,time2,1,1,rho_t)
+
+@time bath_11 = bath_bartek2(dim,time1,time2,1,1)
+
+
+
+
+
+
+
+
+
+
 
 
 
