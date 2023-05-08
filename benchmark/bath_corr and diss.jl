@@ -1,4 +1,4 @@
-include("../src_compare/ME_Bose_Hubbard.jl")
+include("../src/ME_Bose_Hubbard.jl")
 using .ME_Bose_Hubbard
 
 using Test
@@ -10,6 +10,7 @@ using PyCall
 
 using KrylovKit
 using LinearAlgebra
+using Combinatorics
 
 
 
@@ -53,7 +54,7 @@ function dissipator(time1::Real, time2::Real, site1::Int, site2::Int, den_mat)
     
     M = nv(graph)
     N = Int(M / 1)
-    H = BoseHubbard.(NBasis.([N+1, N, N-1], M), Ref(graph))
+    H = BoseHubbard.(NplusBasis.([N-1, N, N+1], M), Ref(graph))
   
     state1= State([one(T)], [fill(1, M)])
     state2= State([one(T)], [fill(1, M)])
@@ -69,17 +70,29 @@ time1 =0.3
 time2 = 0.1
 num_points = 40
 
-rho_t = [1 0 0 0;
-         0 0 0 0;
-         0 0 0 0;
-         0 0 0 0]
+rho_t = [0.2 0 0 0 0 0 0 0 0;
+         0 0.2 0 0 0 0 0 0 0;
+         0 0 0.1 0 0 0 0 0 0;
+         0 0 0 0.1 0 0 0 0 0;
+         0 0 0 0 0.1 0 0 0 0;
+         0 0 0 0 0 0.1 0 0 0;
+         0 0 0 0 0 0 0.1 0 0;
+         0 0 0 0 0 0 0 0.05 0;
+         0 0 0 0 0 0 0 0 0.05]
 
 #note that this ρ(t) is not the correct density matrix. 
 #as mentioned in the pdfs, we need to work with a hilbert space which can contain N-1,N,N+1 bosons or upto N+1 bosons.         
 
-@time dissipator_11 = dissipator(time1,time2,1,1,rho_t)
+@time dissipator_11 = dissipator(time1,time2,2,1,rho_t)
 
-@time bath_11 = bath_corr2(dim,time1,time2,1,1)
+@time bath_11 = bath_corr2(time1,time2,2,1)
+
+
+
+
+    
+
+
 
 
 

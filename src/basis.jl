@@ -1,6 +1,7 @@
 export
     Basis,
     NBasis,
+    NplusBasis,
     State,
     get_index,
     dense
@@ -19,11 +20,14 @@ $(TYPEDSIGNATURES)
 """
 all_states(N::Int, M::Int) = vec(collect.(Iterators.product(fill(collect(0:N), M)...)))
 
+
 """
 $(TYPEDSIGNATURES)
 """
 all_sub_states(N::Int, M::Int) = collect(multiexponents(M, N))
 all_sub_states(N::Vector{Int}, M::Int) = vcat(all_sub_states.(N, M)...)
+
+
 
 """
 $(TYPEDSIGNATURES)
@@ -68,6 +72,27 @@ end
 """
 $(TYPEDSIGNATURES)
 """
+
+struct NplusBasis{T, S} <: AbstractBasis
+    N::Union{T, Vector{T}}
+    M::T
+    dim::T
+    tags::Vector{S}
+    eig_vecs::Vector{Vector{T}}
+
+    function NplusBasis(states::Vector, N::IntOrVec, M::Int)
+        tags = tag.(states)
+        order = sortperm(tags)
+        new{Int, eltype(tags)}(N, M, length(states), tags[order], states[order])
+    end
+    NplusBasis(N::IntOrVec, M::Int) = NplusBasis(all_sub_states([N-1,N,N+1], M), N, M)
+end
+
+
+
+"""
+$(TYPEDSIGNATURES)
+"""
 struct State{T}
     coeff::Vector{T}
     eig_vecs::Vector{Vector{Int}}
@@ -80,7 +105,25 @@ struct State{T}
         K = findall(!iszero, ket)
         State(ket[K], B.eig_vecs[K])
     end
+
+    function State(ket::Vector{T}, B::S, C::Vector{Any}) where {T <: Number, S <: AbstractBasis}
+        K = findall(!iszero, ket)
+        common_vecs = intersect(B.eig_vecs[K],C)
+        new_indices =[]
+        for i in 1:length(common_vecs)
+            for j in 1:length(C)
+
+                if common_vecs[i] == C[j]
+                    append!(new_indices,j)
+                end 
+            end       
+        end
+
+
+        State(ket[K], C[new_indices])
+    end
 end
+
 
 Base.eltype(state::State{T}) where {T} = T
 
@@ -106,3 +149,4 @@ function dense(state::State, B::T) where T <: AbstractBasis
     end
     dket
 end
+

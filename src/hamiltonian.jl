@@ -5,7 +5,7 @@ export
 $(TYPEDSIGNATURES)
 """
 struct BoseHubbard{T <: Number}
-    basis::Union{Basis, NBasis, Vector{NBasis}}
+    basis::Union{Basis, NBasis, Vector{NBasis},NplusBasis}
     lattice::LabelledGraph
     H::SparseMatrixCSC{T, Int64}
 end
@@ -65,8 +65,10 @@ function BoseHubbard(B, J::T, U::T, graph) where T <: Number
     BoseHubbard{T}(B, lattice(T, inst))
 end
 
+
 function BoseHubbard(N::IntOrVec, M::Int, J::T, U::T, graph) where T <: Number
     BoseHubbard(NBasis(N, M), J, U, graph)
 end
+
 
 Base.eltype(ham::BoseHubbard{T}) where {T} = T

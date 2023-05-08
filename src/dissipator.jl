@@ -24,11 +24,11 @@ function diss_one_cre(
     
     U_ket = expv(τ, H[2], ket)
     ai_dag_U_ket = create(State(U_ket,H[2].basis),i)
-    Udag_ai_dag_U_ket = expv(-τ, H[1], ai_dag_U_ket )
-    mid_ket = State(rho_t * Udag_ai_dag_U_ket, H[1].basis)
+    Udag_ai_dag_U_ket = expv(-τ, H[2], ai_dag_U_ket )
+    mid_ket = State(rho_t * Udag_ai_dag_U_ket, H[2].basis)
 
-    U_mid_ket = expv(τ-s, H[1], mid_ket)
-    Udag_aj_U_mid_ket = expv(s-τ, H[2], destroy(State(U_mid_ket, H[1].basis),j) )
+    U_mid_ket = expv(τ-s, H[2], mid_ket)
+    Udag_aj_U_mid_ket = expv(s-τ, H[2], destroy(State(U_mid_ket, H[2].basis),j) )
 
     dot(dense(bra, H[2].basis), Udag_aj_U_mid_ket)
 
@@ -43,11 +43,11 @@ function diss_one_des(
     
     U_ket = expv(τ, H[2], ket)
     ai_U_ket = destroy(State(U_ket,H[2].basis),i)
-    Udag_ai_U_ket = expv(-τ, H[3], ai_U_ket )
-    mid_ket = State(rho_t * Udag_ai_U_ket, H[3].basis)
+    Udag_ai_U_ket = expv(-τ, H[2], ai_U_ket )
+    mid_ket = State(rho_t * Udag_ai_U_ket, H[2].basis)
 
-    U_mid_ket = expv(τ-s, H[3], mid_ket)
-    Udag_aj_dag_U_mid_ket = expv(s-τ, H[2], create(State(U_mid_ket, H[3].basis),j) )
+    U_mid_ket = expv(τ-s, H[2], mid_ket)
+    Udag_aj_dag_U_mid_ket = expv(s-τ, H[2], create(State(U_mid_ket, H[2].basis),j) )
 
     dot(dense(bra, H[2].basis), Udag_aj_dag_U_mid_ket)
 
@@ -62,9 +62,9 @@ function diss_two_cre(
 
     rho_ket = State(rho_t * dense(ket,H[2].basis), H[2].basis)
     U_rho_ket = expv(τ-s, H[2], rho_ket)
-    U_dag_aj_U_rho_ket =expv(-s, H[3], destroy(State(U_rho_ket, H[2].basis),j) )
+    U_dag_aj_U_rho_ket =expv(-s, H[2], destroy(State(U_rho_ket, H[2].basis),j) )
     mix_U_state = U_dag_aj_U_rho_ket
-    Udag_ai_dag_mix_U_state = expv(-τ, H[2], create(State(mix_U_state, H[3].basis),i) )
+    Udag_ai_dag_mix_U_state = expv(-τ, H[2], create(State(mix_U_state, H[2].basis),i) )
 
 
     dot(dense(bra,H[2].basis), Udag_ai_dag_mix_U_state)
@@ -80,11 +80,9 @@ function diss_two_des(
 
     rho_ket = State(rho_t * dense(ket,H[2].basis), H[2].basis)
     U_rho_ket = expv(τ-s, H[2], rho_ket)
-    i=1
-    j=2
-    U_dag_aj_dag_U_rho_ket =expv(-s, H[1], create(State(U_rho_ket, H[2].basis),j) )
+    U_dag_aj_dag_U_rho_ket =expv(-s, H[2], create(State(U_rho_ket, H[2].basis),j) )
     mix_U_state = U_dag_aj_dag_U_rho_ket
-    Udag_ai_mix_U_state = expv(-τ, H[2], destroy(State(mix_U_state, H[1].basis),i) )
+    Udag_ai_mix_U_state = expv(-τ, H[2], destroy(State(mix_U_state, H[2].basis),i) )
     
     
     dot(dense(bra,H[2].basis), Udag_ai_mix_U_state)
