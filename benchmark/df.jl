@@ -22,19 +22,19 @@ function rhs!(du, u, p, t)
     A = p[1] # System operator A
     Adag = p[2]
     decay_rate_func1 = p[3] # Rate matrix Γ
-    decay_rate-func2 = p[4]
+    decay_rate_func2 = p[4]
 
     # Compute the time derivative of the density matrix
     du_mat = zeros(9, 9)
     for α in 1:2
         for β in 1:2
             integrand(tau) = (
-                decay_rate_func1(α,β,t,tau) * (
+                decay_rate_func1(α,β,t,tau)*(
                     A[β](t-tau) * ρs * Adag[α](t) -
                     Adag[α](t) * A[β](t-tau) * ρs
                 )
                            + (
-                 decay_rate_func2(α,β,t,tau) * (
+                 decay_rate_func2(α,β,t,tau)*(
                     Adag[β](t-tau) * ρs * A[α](t) -
                     A[α](t) * Adag[β](t-tau) * ρs
                             )
@@ -138,7 +138,7 @@ function bath_corr1( time1::Real ,time2::Real, site1::Int, site2::Int)
     
     state = State([one(T)], [fill(1, M)])
 
-"""
+
     if site1 == 1
         near_neib_site1 = [1,4]
     else
@@ -159,9 +159,9 @@ function bath_corr1( time1::Real ,time2::Real, site1::Int, site2::Int)
     end
 
     return sum
-"""    
     
-    return bath(time1,time2,H,site1,site2,state)
+    
+    #return bath(time1,time2,H,site1,site2,state)
 end  
 
 function bath_corr2( time1::Real, time2::Real, site1::Int, site2::Int)
@@ -174,7 +174,7 @@ function bath_corr2( time1::Real, time2::Real, site1::Int, site2::Int)
     H = BoseHubbard.(NBasis.([N+1, N, N-1,N-2], M), Ref(graph))
     
     state = State([one(T)], [fill(1, M)])
-   """ 
+    
     if site1 == 1
         near_neib_site1 = [1,4]
     else
@@ -195,8 +195,8 @@ function bath_corr2( time1::Real, time2::Real, site1::Int, site2::Int)
     end
 
     return sum
-  """
-    return bath2(time1,time2,H,site1,site2,state)  
+  
+    #return bath2(time1,time2,H,site1,site2,state)  
 end
 
 
@@ -227,8 +227,4 @@ scatter(t,abs.(ρ12))
 plot(t,abs.(ρ12))
 
 
-
-
-
-
-
+  
