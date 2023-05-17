@@ -26,10 +26,10 @@ function rhs!(du, u, p, t)
     for α in 1:2
         for β in 1:2
             integrand(tau) = (
-                bath_corr1(α,β,t,tau)*( diss_mat1
+                bath_corr1(α,β,t,tau)*( dissipator1(t, tau, α, β, ρs)
                 )
                            + (
-                 bath_corr2(α,β,t,tau)*( diss_mat2
+                 bath_corr2(α,β,t,tau)*( dissipator2(t, tau, α, β, ρs)
                             )
                 ))
             integral, _ = quadgk(integrand, 0, 10)
