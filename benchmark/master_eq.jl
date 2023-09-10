@@ -4,10 +4,10 @@ using .ME_Bose_Hubbard
 using Test
 using LightGraphs
 using LabelledGraphs
-
+using QuadGK
 using Plots
 using PyCall
-
+using DifferentialEquations
 using KrylovKit
 using LinearAlgebra
 using Combinatorics
@@ -26,10 +26,10 @@ function rhs!(du, u, p, t)
     for α in 1:2
         for β in 1:2
             integrand(tau) = (
-                bath_corr1(α,β,t,tau)*( dissipator1(t, tau, α, β, ρs)
+                bath_corr1(t,tau,α,β)*( dissipator1(t, tau, α, β, ρs)
                 )
                            + (
-                 bath_corr2(α,β,t,tau)*( dissipator2(t, tau, α, β, ρs)
+                 bath_corr2(t,tau,α,β)*( dissipator2(t, tau, α, β, ρs)
                             )
                 ))
             integral, _ = quadgk(integrand, 0, 10)
@@ -171,7 +171,7 @@ end
 
 
 
-p = [diss_mat1, diss_mat2, bath_corr1, bath_corr2]
+p = [dissipator1, dissipator2, bath_corr1, bath_corr2]
 
 # Define the ODE problem
 prob = ODEProblem(rhs!, u0, tspan, p)
