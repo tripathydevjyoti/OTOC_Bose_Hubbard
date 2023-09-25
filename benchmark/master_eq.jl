@@ -41,7 +41,7 @@ end
 
 # Define the initial conditions and time span
 u0 = [0.0 + 0im, 0.0 + 0im, 0.0 + 0im, 0.0 + 0im,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] # Initial density matrix ρs is |0><0|
-u0[19] = 1.0+0im
+u0[1] = 1.0+0im
 tspan = (0.0, 5.0)
 
 
@@ -183,33 +183,6 @@ sol = solve(prob)
 
 
 
-
-"""
-time1 =0.3
-time2 = 0.1
-num_points = 40
-
-rho_t = [0.2+0im  0 0 0 0 0 0 0 0;
-         0 0.2 0 0 0 0 0 0 0;
-         0 0 0.1 0 0 0 0 0 0;
-         0 0 0 0.1 0 0 0 0 0;
-         0 0 0 0 0.1 0 0 0 0;
-         0 0 0 0 0 0.1 0 0 0;
-         0 0 0 0 0 0 0.1 0 0;
-         0 0 0 0 0 0 0 0.05 0;
-         0 0 0 0 0 0 0 0 0.05]
-
-#note that this ρ(t) is not the correct density matrix. 
-#as mentioned in the pdfs, we need to work with a hilbert space which can contain N-1,N,N+1 bosons or upto N+1 bosons.         
-
-
-
-
-@time dissipator_11 = dissipator(time1,time2,1,1,rho_t)
-
-@time bath_11 = bath_corr2(time1,time2,4,4)
-
-"""
 
 
 
