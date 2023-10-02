@@ -41,7 +41,7 @@ end
 
 # Define the initial conditions and time span
 u0 = [0.0 + 0im, 0.0 + 0im, 0.0 + 0im, 0.0 + 0im,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] # Initial density matrix ρs is |0><0|
-u0[1] = 1.0+0im
+u0[19] = 1.0+0im
 tspan = (0.0, 5.0)
 
 
@@ -83,7 +83,7 @@ function bath_corr1( time1::Real ,time2::Real, site1::Int, site2::Int)
     return sum
     
     
-    #return bath(time1,time2,H,site1,site2,state)
+    
 end  
 
 function bath_corr2( time1::Real, time2::Real, site1::Int, site2::Int)
@@ -118,7 +118,7 @@ function bath_corr2( time1::Real, time2::Real, site1::Int, site2::Int)
 
     return sum
   
-    #return bath2(time1,time2,H,site1,site2,state)  
+     
 end
 
 

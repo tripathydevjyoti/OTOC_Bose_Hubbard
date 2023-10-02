@@ -74,6 +74,14 @@ function hexagonal_graph( J::T, U::T, bndr::Symbol) where T <: Real
     lattice(T, inst)
 end
 
+
+
+
+"""
+$(TYPEDSIGNATURES)
+"""
+
+
 function system_graph(J::T, U::T, bndr::Symbol) where T <: Real
     @assert bndr ∈ (:OBC, :PBC)
 
