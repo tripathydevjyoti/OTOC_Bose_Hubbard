@@ -18,17 +18,17 @@ function otoc_bartek(dim::Dims, time::Real, num_points::Int, site1::Int, site2::
     N = Int(M / 1)
     H = BoseHubbard.(NBasis.([N, N-1, N-2], M), Ref(graph))
     #times = zero(T) .+ T(time / num_points) .* collect(1:num_points)
-    times = range(0,0.5,40)
+    times = range(0,1.0,40)
     state = State([one(T)], [fill(1, M)])
     OTOC.(times, Ref(H), site1, site2, Ref(state))
 end    
 
-dim = (1, 1)
-time = 0.5
+dim = (1, 2)
+time = 0
 num_points = 40
 @time otoc = otoc_bartek(dim, time, num_points, 1,4)
 abs.(otoc)
-Jtimes = range(0,2.0,40)
+Jtimes = range(0,1.0,40)
 plot(Jtimes, abs.(otoc))
 np = pyimport("numpy")
 np.save("otoc_1hex_mi",otoc)
