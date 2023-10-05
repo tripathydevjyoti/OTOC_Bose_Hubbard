@@ -10,7 +10,8 @@ using PyCall
 
 time1 =0.1
 T = eltype(time1)
-J, U = T(4), T(16)
+J, U = T(4), T(0)
+dim =(1,1)
 graph = hexagonal_graph(dim, J::T, U::T, :OBC)
     #graph = hex_graph(T(4),T(16))
 M = nv(graph)
@@ -36,7 +37,7 @@ function super_op(H,op)
 
 end  
 
-op_one = super_op(H[1].H,op_zero)
+
 
 function norm(op)
     sqrt(tr(adjoint(op)*op))
@@ -45,7 +46,7 @@ end
 
 
 
-
+op_one = super_op(H[1].H,op_zero)
 b1 = norm(op_one)
 op_one = op_one/b1
 
@@ -73,9 +74,11 @@ for i in 2:n_iter
 end    
 
 coeff_basis
+#y_axis = [coeff_basis[1:10]]
 
 x_axis = [1,2,3,4,5,6,7,8,9,10]
 
-plot(x_axis, coeff_basis)
-
+plot(x_axis,coeff_basis)
+xlabel!("n")
+ylabel!("b_n")
     
