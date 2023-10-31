@@ -16,8 +16,11 @@ graph = hexagonal_graph(dim, J::T, U::T, :OBC)
     #graph = hex_graph(T(4),T(16))
 M = nv(graph)
 N = Int(M / 1)
+
+
 H = BoseHubbard.(NBasis.([N, N-1, N-2], M), Ref(graph))
-#H = BoseHubbard(6,6 ,J, U, :OBC)
+#H = BoseHubbard(80,3 ,J, U, :OBC)
+#bh_hamil = H.H
 bh_hamil = H[1].H
 
 site =3
@@ -41,7 +44,7 @@ end
 
 
 function trace_norm(op1,op2)
-    tr(adjoint(op1)*op2)
+    tr(adjoint(op1)*op2)/dim_ham
 end
 
 function norm(op)
@@ -52,7 +55,7 @@ end
 
 
 op_zero = op_zero/norm(op_zero)
-
+norm(op_zero)
 op_one = super_op(Matrix(bh_hamil),op_zero)
 b1 = norm(op_one)
 op_one = op_one/b1
@@ -60,7 +63,7 @@ op_one = op_one/b1
 op_basis = [op_one]
 coeff_basis = [b1]
 
-n_iter = 461
+n_iter = 462
    
 
 for i in 2:n_iter
@@ -83,15 +86,10 @@ end
 
 coeff_basis
 op_basis
+
 #y_axis = [coeff_basis[1:10]]
 
 x_axis = collect(1:n_iter)
-coup4= coeff_basis
-coup3 = coeff_basis
-coup2 =coeff_basis
-coup1 = coeff_basis
-couphalf = coeff_basis
-plot(x_axis,[couphalf,coup1,coup2,coup3,coup4,coeff_basis], linewidth=3,  label=["U/J =0.5" "U/J =1" "U/J =2" "U/J =3" "U/J =4"])
 plot(x_axis,coeff_basis)
 xlabel!("n")
 ylabel!("Lanczos Coefficients")
@@ -108,20 +106,21 @@ time_axis = collect(times)
 complexity = []
 
 for i in 1:length(time_axis)
-    op_t = time_evol_op(time_axis[i], op_zero,Matrix(bh_hamil))
+    op_t = time_evol_op(time_axis[i], op_zero/norm(op_zero),Matrix(bh_hamil))
     sum = 0
     phi_zero = trace_norm(op_zero,op_t)
-    sum =sum + 0*abs(phi_zero)*abs(phi_zero)
+    sum =sum + abs(phi_zero)*abs(phi_zero)
     
     for j in 1:n_iter
         phi_j = trace_norm(op_basis[j],op_t)
-        sum = sum + j*abs(phi_j)*abs(phi_j)
+        sum = sum + abs(phi_j)*abs(phi_j)
     end
     push!(complexity,sum)
 end
 
 plot(time_axis,[complexity],linewidth = 2.5,label =["U/J=4"])
-vline!([0.25], label="OTOC Decay", line=(color="black", linestyle=:dash))
+
+vline!([1.00], label="OTOC Decay", line=(color="black", linestyle=:dash))
 xlabel!("t")
 ylabel!("Krylov Complexity")
 savefig("/Users/dev/Desktop/complexity_BH.pdf")
@@ -133,13 +132,14 @@ using Plots
 
 
 # Compute eigenvalues
-eigenvalues = eigvals(Matrix(H[1].H))
+eigenvalues = eigvals(Matrix(bh_hamil))
 
 # Sort the eigenvalues in ascending order
 sorted_eigenvalues = sort(eigenvalues)
 
 # Calculate level spacings
 level_spacings = diff(sorted_eigenvalues)
+histogram(level_spacings, bins=60)
 num = length(level_spacings)
 r_alpha = []
 for i in 1:num
@@ -148,16 +148,16 @@ for i in 1:num
         push!(r_alpha,min(ra,(1/ra)))
     end
 end        
-r_alpha       
-histogram(r_alpha, bins=100 )
+weak = r_alpha       
+histogram([r_alpha], bins=60 )
 mean(r_alpha)
 
 sort(level_spacings)
 using Statistics
-avg = mean(level_spacings)
+avg = mean(r_alpha)
 # Plot the level spacing distribution
 # Plot the level spacing distribution
-histogram(level_spacings, bins=20, label="Level Spacing Distribution", legend=true)
+histogram(r_alpha, bins=20, label="Level Spacing Distribution", legend=true)
 
 # Customize the plot as needed
 title!("Level Spacing Distribution for Quantum Chaos")
