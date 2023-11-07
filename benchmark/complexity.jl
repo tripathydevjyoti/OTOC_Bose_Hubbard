@@ -10,7 +10,7 @@ using PyCall
 
 time1 =0.1
 T = eltype(time1)
-J, U = T(4), T(16)
+J, U = T(4), T(10)
 dim =(1,1)
 graph = hexagonal_graph(dim, J::T, U::T, :OBC)
     #graph = hex_graph(T(4),T(16))
@@ -18,24 +18,26 @@ M = nv(graph)
 N = Int(M / 1)
 
 
-H = BoseHubbard.(NBasis.([N, N-1, N-2], M), Ref(graph))
-#H = BoseHubbard(80,3 ,J, U, :OBC)
+#H = BoseHubbard.(NBasis.([N, N-1, N-2], M), Ref(graph))
+H = BoseHubbard(5, 3 ,J, U, :OBC)
 #bh_hamil = H.H
-bh_hamil = H[1].H
+bh_hamil = H.H
 
-site =3
+site =2
 
 
 
-dim_ham = length(H[1].basis.eig_vecs)
+dim_ham = length(H.basis.eig_vecs)
 op_zero = zeros((dim_ham,dim_ham))
-H[1].basis.eig_vecs
+H.basis.eig_vecs
+
 
 for i in 1:dim_ham
-    op_zero[i,i] = float(H[1].basis.eig_vecs[i][site])
+    op_zero[i,i] = (H.basis.eig_vecs[i][site])
 end    
 
 op_zero
+adjoint(op_zero)==op_zero
 
 function super_op(H,op)
     return H*op - op*H
@@ -63,7 +65,7 @@ op_one = op_one/b1
 op_basis = [op_one]
 coeff_basis = [b1]
 
-n_iter = 462
+n_iter = 500
    
 
 for i in 2:n_iter
@@ -87,10 +89,39 @@ end
 coeff_basis
 op_basis
 
+op_one = super_op(bh_hamil,op_zero)
+op_one = op_one - trace_norm(op_zero,op_one)*op_zero
+op_one = op_one - trace_norm(op_zero,op_one)*op_zero
+b1 = norm(op_one)
+op_one = op_one/b1
+op_basis = [op_one]
+coeff_basis = [b1]
+
+for i in 2:n_iter
+    new_op = super_op(bh_hamil,op_basis[i-1])
+    
+    new_op = new_op - trace_norm(op_zero,new_op)*op_zero
+    for j in 1:i-1
+        new_op = new_op - trace_norm(op_basis[j],new_op)*op_basis[j]
+    end
+    
+    new_op = new_op - trace_norm(op_zero,new_op)*op_zero
+    for j in 1:i-1
+        new_op = new_op - trace_norm(op_basis[j],new_op)*op_basis[j]
+    end
+    
+    new_coeff = norm(new_op)
+    
+    push!(op_basis,new_op/new_coeff)
+    push!(coeff_basis,new_coeff)
+end           
+
+
+
 #y_axis = [coeff_basis[1:10]]
 
 x_axis = collect(1:n_iter)
-plot(x_axis,coeff_basis)
+plot(x_axis,coeff_basis,linewidth=1.5)
 xlabel!("n")
 ylabel!("Lanczos Coefficients")
 savefig("/Users/dev/Desktop/coeff_BH.pdf")
@@ -101,7 +132,7 @@ function time_evol_op(time, op, hamil)
     exp(1im*time*hamil)*op*exp(-1im*time*hamil)
 end
 
-times = range(0.0, stop=15, length=20)
+times = range(0.0, stop=600, length=1000)
 time_axis = collect(times)
 complexity = []
 
@@ -109,15 +140,16 @@ for i in 1:length(time_axis)
     op_t = time_evol_op(time_axis[i], op_zero/norm(op_zero),Matrix(bh_hamil))
     sum = 0
     phi_zero = trace_norm(op_zero,op_t)
-    sum =sum + abs(phi_zero)*abs(phi_zero)
+    sum =sum + 0*abs(phi_zero)*abs(phi_zero)
     
     for j in 1:n_iter
         phi_j = trace_norm(op_basis[j],op_t)
-        sum = sum + abs(phi_j)*abs(phi_j)
+        sum = sum + j*abs(phi_j)*abs(phi_j)
     end
     push!(complexity,sum)
 end
 
+complexity
 plot(time_axis,[complexity],linewidth = 2.5,label =["U/J=4"])
 
 vline!([1.00], label="OTOC Decay", line=(color="black", linestyle=:dash))
@@ -149,7 +181,7 @@ for i in 1:num
     end
 end        
 weak = r_alpha       
-histogram([r_alpha], bins=60 )
+histogram([r_alpha], bins=20)
 mean(r_alpha)
 
 sort(level_spacings)
