@@ -10,7 +10,7 @@ using PyCall
 
 time1 =0.1
 T = eltype(time1)
-J, U = T(4), T(10)
+J, U = T(4), T(16)
 dim =(1,1)
 graph = hexagonal_graph(dim, J::T, U::T, :OBC)
     #graph = hex_graph(T(4),T(16))
@@ -65,7 +65,7 @@ op_one = op_one/b1
 op_basis = [op_one]
 coeff_basis = [b1]
 
-n_iter = 500
+n_iter = 420
    
 
 for i in 2:n_iter
@@ -119,12 +119,17 @@ end
 
 
 #y_axis = [coeff_basis[1:10]]
-
+twofivecoup = coeff_basis
+threecoup = coeff_basis
+fourcoup = coeff_basis
+twofiveop = op_basis
+fourop = op_basis
+inte = coeff_basis
 x_axis = collect(1:n_iter)
-plot(x_axis,coeff_basis,linewidth=1.5)
+plot(x_axis,[twofivecoup,fourcoup,inte],linewidth=1.3,label=[ "U/J=2.5" "U/J=4" "U/J=0"])
 xlabel!("n")
 ylabel!("Lanczos Coefficients")
-savefig("/Users/dev/Desktop/coeff_BH.pdf")
+savefig("/Users/priyoshankarpal/Desktop/coeff_BH_COMB.pdf")
 
 
 Matrix(bh_hamil)
@@ -132,30 +137,33 @@ function time_evol_op(time, op, hamil)
     exp(1im*time*hamil)*op*exp(-1im*time*hamil)
 end
 
-times = range(0.0, stop=600, length=1000)
+times = range(0.0, stop=0.3, length=100)
 time_axis = collect(times)
 complexity = []
-
+entropy =[]
 for i in 1:length(time_axis)
     op_t = time_evol_op(time_axis[i], op_zero/norm(op_zero),Matrix(bh_hamil))
     sum = 0
+    sum1 = 0
     phi_zero = trace_norm(op_zero,op_t)
     sum =sum + 0*abs(phi_zero)*abs(phi_zero)
-    
+    sum1 = sum1 - abs(phi_zero)*abs(phi_zero)*log(abs(phi_zero)*abs(phi_zero)) 
     for j in 1:n_iter
-        phi_j = trace_norm(op_basis[j],op_t)
+        phi_j = trace_norm(fourop[j],op_t)
         sum = sum + j*abs(phi_j)*abs(phi_j)
+        sum1 = sum1 - abs(phi_j)*abs(phi_j)*log(abs(phi_j)*abs(phi_j))
     end
     push!(complexity,sum)
+    push!(entropy, sum1)
 end
-
+c
 complexity
-plot(time_axis,[complexity],linewidth = 2.5,label =["U/J=4"])
-
+plot(time_axis,[complexity, entropy],linewidth = 2.5,label =["complexity" "entropy"])
+entropy
 vline!([1.00], label="OTOC Decay", line=(color="black", linestyle=:dash))
 xlabel!("t")
-ylabel!("Krylov Complexity")
-savefig("/Users/dev/Desktop/complexity_BH.pdf")
+ylabel!("U/J=4")
+savefig("/Users/priyoshankarpal/Desktop/complexity_BH_4early.pdf")
 
 
 
