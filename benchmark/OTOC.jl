@@ -3,36 +3,37 @@ using .OTOC_Bose_Hubbard
 using Test
 using LightGraphs
 using LabelledGraphs
-
+using MetaGraphs
 using Plots
 using PyCall
-
-
 
 
 
 function otoc_bartek(dim::Dims, time::Real, num_points::Int, site1::Int, site2::Int)
     T = eltype(time)
     J, U = T(4), T(16)
-    graph = hexagonal_graph(dim, J::T, U::T, :OBC)
+    graph = twod_graph(dim, J::T, U::T, :OBC)
     #graph = hex_graph(T(4),T(16))
     M = nv(graph)
     N = Int(M / 1)
     H = BoseHubbard.(NBasis.([N, N-1, N-2], M), Ref(graph))
     #times = zero(T) .+ T(time / num_points) .* collect(1:num_points)
-    times = range(0,1.0,40)
+    times = range(0,2.0,40)
     state = State([one(T)], [fill(1, M)])
     OTOC.(times, Ref(H), site1, site2, Ref(state))
 end    
 
 dim = (1, 2)
-time = 0
+time1 = 0
 num_points = 40
-@time otoc = otoc_bartek(dim, time, num_points, 1,4)
+@time otoc = otoc_bartek(dim, time1, num_points, 1,3)
 abs.(otoc)
-Jtimes = range(0,1.0,40)
-plot(Jtimes, abs.(otoc))
+
+
+Jtimes = range(0,2.0,40)
+plot(Jtimes, [abs.(otoc)])
 np = pyimport("numpy")
+np.save("figtwo_one_three.npy",abs.(otoc))
 np.save("otoc_1hex_mi",otoc)
 #print(otoc)
 
