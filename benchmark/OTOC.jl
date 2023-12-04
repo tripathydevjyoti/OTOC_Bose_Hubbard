@@ -26,14 +26,14 @@ end
 dim = (1, 2)
 time1 = 0
 num_points = 40
-@time otoc = otoc_bartek(dim, time1, num_points, 1,3)
+@time otoc = otoc_bartek(dim, time1, num_points, 2,5)
 abs.(otoc)
-
+twothre = abs.(otoc)
 
 Jtimes = range(0,2.0,40)
-plot(Jtimes, [abs.(otoc)])
+plot(Jtimes, [twothre,abs.(otoc)])
 np = pyimport("numpy")
-np.save("figtwo_one_three.npy",abs.(otoc))
+np.save("figfive_two_five.npy",abs.(otoc))
 np.save("otoc_1hex_mi",otoc)
 #print(otoc)
 
