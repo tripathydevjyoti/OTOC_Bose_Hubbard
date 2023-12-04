@@ -81,9 +81,9 @@ function twod_graph(dim::Dims, J::T, U::T, bndr::Symbol) where T <: Real
     nx = pyimport("networkx")
     hg = nx.Graph()
     
-    hg.add_nodes_from([1,2,3,4,5])
+    hg.add_nodes_from([1,2,3,4])
 
-    hg.add_edges_from([(1,2),(2,3),(3,4),(4,5),(5,1),(2,4)])
+    hg.add_edges_from([(1,2),(2,3),(3,4),(4,1)])
     
     
     map = Dict(v => i for (i, v) ∈ enumerate(hg.nodes))
