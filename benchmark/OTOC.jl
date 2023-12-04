@@ -9,6 +9,8 @@ using PyCall
 
 
 
+
+
 function otoc_bartek(dim::Dims, time::Real, num_points::Int, site1::Int, site2::Int)
     T = eltype(time)
     J, U = T(4), T(16)
