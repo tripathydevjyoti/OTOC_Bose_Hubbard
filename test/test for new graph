@@ -1,14 +1,39 @@
 using Plots
 using PyCall
 
-np = pyimport("numpy")
+using PyCall
 
-data1 = np.load("figsix_two_five.npy")
-data2 = np.load("figsix_two_six.npy")
-data3 = np.load("figsix_two_three.npy")
+# Import the necessary Matplotlib modules
+@pyimport matplotlib.pyplot as plt
+@pyimport numpy as np
+
+
+
+
+
+
+plt.clf()
+data1 = np.load("figtwo_one_four.npy")
+
+data3 = np.load("figtwo_one_three.npy")
 
 Jtimes = 4*range(0,2.0,40)
-plot(Jtimes,[data1,data2,data3],linewidth=3,label=["Config 1" "Config 2" "Config3"])
+plt.plot(Jtimes,data1, label = "Config 1")
+#plt.plot(Jtimes,data2, label = "Config 2")
+plt.plot(Jtimes,data3, label = "Config 2")
+plt.scatter(Jtimes,data1)
+#plt.scatter(Jtimes,data2)
+plt.scatter(Jtimes,data3)
+plt.title("Graph 1")
+plt.xlabel("Jt")
+plt.ylabel("|OTOC|")
+plt.legend()
+plt.grid()
+# Show the plot
+plt.show()
+
+save_path = "Graph 1.pdf"
+plt.savefig(save_path)
 xlabel!("Jt")
 ylabel!("|OTOC|")
 title!("Graph 4")
