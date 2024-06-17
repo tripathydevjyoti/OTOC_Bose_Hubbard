@@ -46,13 +46,13 @@ function bath2(
     τ = -1im * time1
     s = -1im * time2
 
-    evol_ket = expv((τ-s),H[2],state)
+    evol_ket = expv((τ),H[2],state)
     
-    adag_i_ket= create(State(evol_ket,H[2].basis),i)
+    a_i_ket= destroy(State(evol_ket,H[2].basis),i)
                 
-    state_temp = expv(s,H[1],adag_i_ket)
+    state_temp = expv(s,H[3],a_i_ket)
 
-    U_ai_ket = dense(State(expv(-τ, H[2], destroy(State(state_temp,H[1].basis), j)),H[2].basis), H[2].basis)
+    U_ai_ket = dense(State(expv(-(τ-s), H[2], create(State(state_temp,H[3].basis), j)),H[2].basis), H[2].basis)
    
    
     
