@@ -64,13 +64,13 @@ end
 """
 
 function bath(
-    time1::T, time2::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State; kwargs=()
+    time1::T, time2::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State, beta::T; kwargs=()
 ) where {S, T <: Real}
     τ = -1im * time1
     s = -1im * time2
 
-    
-    evol_ket = expv((τ), H[2],state)
+    therm_ket = expv(-beta, H[2], state)
+    evol_ket = expv((τ), H[2], State(therm_ket, H[2].basis))
     half_ket = expv(-s , H[1], create(State(evol_ket,H[2].basis), i))
     
     evol_bra = expv( (τ- s), H[2],state)
@@ -85,12 +85,13 @@ end
 
 
 function bath2(
-    time1::T, time2::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State; kwargs=()
+    time1::T, time2::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State, beta::T; kwargs=()
 ) where {S, T <: Real}
     τ = -1im * time1
     s = -1im * time2
 
-    evol_ket = expv((τ),H[2],state)
+    therm_ket = expv(-beta, H[2], state)
+    evol_ket = expv((τ),H[2], State(therm_ket,H[2].basis))
     
     a_i_ket= destroy(State(evol_ket,H[2].basis),i)
                 
