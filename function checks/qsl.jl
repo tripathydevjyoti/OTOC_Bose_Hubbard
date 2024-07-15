@@ -32,11 +32,47 @@ T = eltype(tcheck)
 
 J, U = T(4), T(16)
 N=M=6
+beta = 1.0
 H = BoseHubbard.([N+1, N, N-1,N-2], M, J, U, :OBC)
-eigenvalues, eigenstates = eigs(H[2].H, nev=1, which=:SR)
-lowest_eigenstate = eigenstates[:,1]
+#eigenvalues, eigenstates = eigs(H[2].H, nev=1, which=:SR)
+#lowest_eigenstate = eigenstates[:,1]
 #state = State(lowest_eigenstate,H[2].basis)
-state = State([one(T)], [fill(1, M)])
+#state = State([one(T)], [fill(1, M)])
+eigenvals, eigenvecs = eigen(Matrix(H[2].H))
+function part_func(beta, H)
+    
+    part_sum = 0
+    for i in 1:length(eigenvals)
+        part_sum = part_sum + exp(-beta*eigenvals[i])
+        
+    end
+    part_sum
+end        
+
+partition_function = part_func(T(1), H)
+
+
+function thermal_corr(beta, H, time)
+    
+
+    trsum1 = 0
+    trsum2 = 0
+   
+    for i in 1:length(eigenvals)
+        
+        gibbs = exp(-beta*eigenvals[i])
+        gamma1 = gibbs*bath(time, time, H, 1, 1, State(eigenvecs[:, i], H[2].basis) )
+        gamma2 = gibbs*bath2(time, time, H, 1, 1, State(eigenvecs[:, i], H[2].basis) )
+       
+        trsum1 = trsum1 + gamma1
+        trsum2 = trsum2 + gamma2
+        
+    end
+    
+    corr_arr = [trsum1/ partition_function, trsum2/partition_function]
+return corr_arr
+end
+
 function integrand_fdag(t)
     T = eltype(t)
 
@@ -99,36 +135,37 @@ end
 #@time result_g, _ = quadgk(integrand_g , t_lower, t_upper)
 
 function int_lind1(t, ns)
-    s_upper = t
-    integrate_s, _=quadgk(s -> (bath(t, s, H, 1, 1, state))*exp(-1im*U*ns*s), s_lower, s_upper)
 
-    return integrate_s
+   
+    s_upper = 0.1
+    integrate_s, _=quadgk(s -> (thermal_corr(1.0, H, s)[1])*exp(-1im*U*ns*s), s_lower, s_upper)
+    integrate_sprime, _=quadgk(s -> (thermal_corr(1.0, H, s)[2])*exp(1im*U*ns*s), s_lower, s_upper)
+
+    return [integrate_s, integrate_sprime]
 end
-
+"""
 function int_lind2(t, ns)
     s_upper = t
     integrate_s, _=quadgk(s -> (bath2(t, s, H, 1, 1, state))*exp(1im*U*ns*s), s_lower, s_upper)
 
     return integrate_s
 end
+"""
 
 
-t_upper = np.linspace(0,0.1,12)
+int_lind1(0.1,0)
+t_upper = np.linspace(0,1.0,12)
 result = []
 
-result_lind =[]
+#result_lind =[]
+result_lind = int_lind1(0,2)
+bound_sum = 0
+for j in 0:n-1
+    result_lind = int_lind1(0.1,j)
+    bound_sum = bound_sum + (i+1)*(np.real((result_lind[1]) )+ np.real( (result_lind[2])))
 
-
-for i in 1:length(t_upper)
-    sum =0
-    
-    for j in 0:n-1
-        result1, _ = quadgk(t -> int_lind1(t, j), t_lower, t_upper[i] )
-        result2, _ = quadgk(t -> int_lind2(t, j), t_lower, t_upper[i] )
-        sum = sum + (i+1)*(np.real(result1)+ np.real(result2))
-    end
-    push!(result_lind, sum)
 end
+print(bound_sum)
 
 
 
