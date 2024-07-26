@@ -1,42 +1,35 @@
-using LinearAlgebra
-using DifferentialEquations
-using QuadGK
 include("../src/ME_Bose_Hubbard.jl")
 using .ME_Bose_Hubbard
+
+using Test
 using LightGraphs
 using LabelledGraphs
-
+using DifferentialEquations
 using Plots
 using PyCall
-
+using QuadGK
 using KrylovKit
 using LinearAlgebra
 using Combinatorics
 
 
-
-# Define the time derivative function
 function rhs!(du, u, p, t)
     # Unpack the state variables
     ρs = reshape(u, (9, 9)) # Density matrix ρs is a 2x2 matrix
-    A = p[1] # System operator A
-    Adag = p[2]
-    decay_rate_func1 = p[3] # Rate matrix Γ
-    decay_rate_func2 = p[4]
+    diss_mat1 = p[1] # System operator A
+    diss_mat2 = p[2]
+    bath_corr1 = p[3] # Rate matrix Γ
+    bath_corr2 = p[4]
 
     # Compute the time derivative of the density matrix
     du_mat = zeros(9, 9)
     for α in 1:2
         for β in 1:2
             integrand(tau) = (
-                decay_rate_func1(α,β,t,tau)*(
-                    A[β](t-tau) * ρs * Adag[α](t) -
-                    Adag[α](t) * A[β](t-tau) * ρs
+                bath_corr1(t,tau,α,β)*( dissipator1(t, tau, α, β, ρs)
                 )
                            + (
-                 decay_rate_func2(α,β,t,tau)*(
-                    Adag[β](t-tau) * ρs * A[α](t) -
-                    A[α](t) * Adag[β](t-tau) * ρs
+                 bath_corr2(t,tau,α,β)*( dissipator2(t, tau, α, β, ρs)
                             )
                 ))
             integral, _ = quadgk(integrand, 0, 10)
@@ -46,84 +39,13 @@ function rhs!(du, u, p, t)
     du .= du_mat[:]
 end
 
-   
-
 # Define the initial conditions and time span
 u0 = [0.0 + 0im, 0.0 + 0im, 0.0 + 0im, 0.0 + 0im,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] # Initial density matrix ρs is |0><0|
 u0[19] = 1.0+0im
 tspan = (0.0, 5.0)
 
-# Define the system operator A and rate matrix Γ
-#A1(t) = [1 0; 0 exp(-im*t)] # A_1(t) operator
-#
-time1 = 0.3
-T = eltype(time1)
-J, U = T(0), T(16)
-graph = system_graph(J::T, U::T, :OBC)
-
-M = nv(graph)
-N = Int(M / 1)
-H = BoseHubbard.(NplusBasis.([N-1, N, N+1], M), Ref(graph))
 
 
-
-
-
-a1dag = [ 0 0 0 0 0 0 0 0 0;
-       0 0 0 0 0 0 0 0 0;
-       sqrt(2) 0 0 0 0 0 0 0 0;
-       0 0 0 0 0 0 0 0 0;
-       0 sqrt(3) 0 0 0 0 0 0 0;
-       0 0 0 0 sqrt(2) 0 0 0 0;
-       0 0 0 0 0 0 0 0 0;
-       0 0 0 0 0 0 0 0 0;
-       0 0 1 0 0 0 0 0 0]
-
-a2dag = [ 0 0 0 0 0 0 0 0 0;
-          0 0 0 0 0 0 0 0 0;
-          0 0 0 0 0 0 sqrt(2) 0 0;
-          0 0 0 0 0 0 0 sqrt(3) 0;
-          1 0 0 0 0 0 0 0 0;
-          0 0 1 0 0 0 0 0 0;
-          0 0 0 0 0 0 0 0 0;
-          0 0 0 0 0 0 0 0 0;
-          0 0 0 sqrt(2) 0 0 0 0 0]
-
-a1 = [ 0 0 sqrt(2) 0 0 0 0 0 0;
-       0 0 0 0 sqrt(3) 0 0 0 0;
-       0 0 0 0 0 0 0 0 1;
-       0 0 0 0 0 0 0 0 0;
-       0 0 0 0 0 sqrt(2) 0 0 0;
-       0 0 0 0 0 0 0 0 0;
-       0 0 0 1 0 0 0 0 0;
-       0 0 0 0 0 0 0 0 0;
-       0 0 0 0 0 0 0 0 0] 
-
-a2 = [ 0 0 0 0 1 0 0 0 0;
-       0 0 0 0 0 0 0 0 0;
-       0 0 0 0 0 1 0 0 0;
-       0 0 0 0 0 0 0 0 sqrt(2);
-       0 0 0 0 0 0 0 0 0;
-       0 0 0 0 0 0 0 0 0;
-       0 0 sqrt(2) 0 0 0 0 0 0;
-       0 0 0 sqrt(3) 0 0 0 0 0;
-       0 0 0 0 0 0 0 0 0]       
-       
-
-A1(t) = exp(1im*t*Matrix(H[2].H)) * a1 * exp(-1im*t*Matrix(H[2].H))
-A2(t) = exp(1im*t*Matrix(H[2].H)) * a2 * exp(-1im*t*Matrix(H[2].H))
-A1dag(t) = exp(1im*t*Matrix(H[2].H)) * a1dag * exp(-1im*t*Matrix(H[2].H))
-A2dag(t) = exp(1im*t*Matrix(H[2].H)) * a2dag * exp(-1im*t*Matrix(H[2].H))
-
-H[2].basis
-Matrix(H[2].H)
-
-
-
-
-#A2(t) = [0 exp(im*t); 0 0] # A_2(t) operator
-A = [A1, A2] # Vector of system operators
-Adag = [A1dag, A2dag]
 
 
 function bath_corr1( time1::Real ,time2::Real, site1::Int, site2::Int)
@@ -201,17 +123,55 @@ end
 
 
 
-function decay_rate_func1(α,β,t,tau)
-    return bath_corr1(t,tau,β,α)
+function dissipator1(time1::Real, time2::Real, site1::Int, site2::Int, den_mat)
+    T = eltype(time1)
+    J, U = T(0), T(16)
+    graph = system_graph(J::T, U::T, :OBC)
+    
+    M = nv(graph)
+    N = Int(M / 1)
+    H = BoseHubbard.(NplusBasis.([N-1, N, N+1], M), Ref(graph))
+    basis_states = [[2,1],[3,0],[1,2],[0,3],[1,1],[2,0],[0,2],[1,0],[0,1]]
+    diss_mat1 = zeros(9,9)
+    for i in 1:length(basis_states)
+        for j in 1:length(basis_states)
+            state1= State([one(T)], [basis_states[i]])
+            state2= State([one(T)], [basis_states[j]])
+
+            diss_mat1[i][j] = diss_one_cre(time1, time2, H, site1, site2, state1, state2, den_mat) 
+            diss_mat1[i][j] += -diss_two_cre(time1, time2, H, site1, site2, state1, state2, den_mat) 
+        end
+    end    
+
+    return diss_mat1    
 end
 
-function decay_rate_func2(α,β,t,tau)
-    return bath_corr2(t,tau,β,α)
-end    
+function dissipator2(time1::Real, time2::Real, site1::Int, site2::Int, den_mat)
+    T = eltype(time1)
+    J, U = T(0), T(16)
+    graph = system_graph(J::T, U::T, :OBC)
+    
+    M = nv(graph)
+    N = Int(M / 1)
+    H = BoseHubbard.(NplusBasis.([N-1, N, N+1], M), Ref(graph))
+    basis_states = [[2,1],[3,0],[1,2],[0,3],[1,1],[2,0],[0,2],[1,0],[0,1]]
+    diss_mat2 = zeros(9,9)
+    for i in 1:length(basis_states)
+        for j in 1:length(basis_states)
+            state1= State([one(T)], [basis_states[i]])
+            state2= State([one(T)], [basis_states[j]])
+
+            diss_mat2[i][j] = diss_one_des(time1, time2, H, site1, site2, state1, state2, den_mat) 
+            diss_mat2[i][j] += -diss_two_des(time1, time2, H, site1, site2, state1, state2, den_mat) 
+        end
+    end    
+
+    return diss_mat2    
+end
 
 
-# Define the parameter vector
-p = [A, Adag, decay_rate_func1,decay_rate_func2]
+
+p = [dissipator1, dissipator2, bath_corr1, bath_corr2]
 
 # Define the ODE problem
 prob = ODEProblem(rhs!, u0, tspan, p)
@@ -220,11 +180,54 @@ prob = ODEProblem(rhs!, u0, tspan, p)
 
 sol = solve(prob)
 
-t = sol.t
-ρ12 = [sol[i][6] for i in 1:length(t)]
-using Plots
-scatter(t,abs.(ρ12))
-plot(t,abs.(ρ12))
 
 
-  
+
+
+"""
+time1 =0.3
+time2 = 0.1
+num_points = 40
+
+rho_t = [0.2+0im  0 0 0 0 0 0 0 0;
+         0 0.2 0 0 0 0 0 0 0;
+         0 0 0.1 0 0 0 0 0 0;
+         0 0 0 0.1 0 0 0 0 0;
+         0 0 0 0 0.1 0 0 0 0;
+         0 0 0 0 0 0.1 0 0 0;
+         0 0 0 0 0 0 0.1 0 0;
+         0 0 0 0 0 0 0 0.05 0;
+         0 0 0 0 0 0 0 0 0.05]
+
+#note that this ρ(t) is not the correct density matrix. 
+#as mentioned in the pdfs, we need to work with a hilbert space which can contain N-1,N,N+1 bosons or upto N+1 bosons.         
+
+
+
+
+@time dissipator_11 = dissipator(time1,time2,1,1,rho_t)
+
+@time bath_11 = bath_corr2(time1,time2,4,4)
+
+"""
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

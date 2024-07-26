@@ -45,7 +45,7 @@ function integrate_thermal_corr(beta, H, time_range)
     
     
     integral_trsum1 = trapz(time_range, trsum1_vals)
-    print("int1done")
+    #print("int1done")
     integral_trsum2 = trapz(time_range, trsum2_vals)
     
     return integral_trsum1, integral_trsum2
@@ -58,7 +58,6 @@ N=M=6             #no of sites and bosons in the chain
 beta = 1.0        #inverse temperature
 H = BoseHubbard.([N+1, N, N-1,N-2], M, J, U, :OBC) #BH hamiltonian 
 eigenvals, eigenvecs = eigen(Matrix(H[2].H))
-eigenvals
 partition_function = part_func(1.0, H)  #partition function for the BH hamiltonian
 
 
@@ -72,9 +71,9 @@ trsum2_vals = Float64[]
         corr_arr = thermal_corr(beta, H, t,partition_function)
         push!(trsum1_vals, np.real(corr_arr[1]))
         push!(trsum2_vals, np.real(corr_arr[2]))
-        print(t)
+        #print(t)
 end
-int_sum_lin2 =np.save("trsum2_vals.npy", trsum_vals)
+
 integral_trsum1, integral_trsum2 = integrate_thermal_corr(beta, H, time_range)
 
 
@@ -85,14 +84,15 @@ for j in 0:n-1
     bound_sum = bound_sum + (j+1)*(np.real((integral_trsum1) )+ np.real( (integral_trsum2)) )
 
 end
-print(bound_sum)
+
 
 
 times = np.linspace(0,0.1,20)
 plot(J*times, 4*J*J*bound_sum*times)
-np.save("qsl_lind.npy", 4*J*J*bound_sum*times)
-qsl = np.load("qsl_lind.npy")
-plot(J*times, qsl)
+np.save("qsl_lind_bound.npy",  4*J*J*bound_sum*times)
+
+
+
 """
 
 for i in 1:length(t_upper)
