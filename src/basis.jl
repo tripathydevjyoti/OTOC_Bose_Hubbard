@@ -2,6 +2,7 @@ export
     Basis,
     NBasis,
     NplusBasis,
+    RBasis,
     State,
     get_index,
     dense
@@ -54,6 +55,9 @@ end
 """
 $(TYPEDSIGNATURES)
 """
+
+
+
 struct NBasis{T, S} <: AbstractBasis
     N::Union{T, Vector{T}}
     M::T
@@ -88,6 +92,27 @@ struct NplusBasis{T, S} <: AbstractBasis
     NplusBasis(N::IntOrVec, M::Int) = NplusBasis(all_sub_states([N-1,N,N+1], M), N, M)
 end
 
+"""
+$(TYPEDSIGNATURES)
+"""
+
+struct RBasis{T, S} <: AbstractBasis
+    N::Union{T, Vector{T}}
+    M::T
+    dim::T
+    tags::Vector{S}
+    eig_vecs::Vector{Vector{T}}
+
+    function RBasis(states::Vector, N::IntOrVec, M::Int)
+        # Generate tags for each state but don't reorder
+        tags = tag.(states)
+        
+        # Keep the original order of states and tags
+        new{Int, eltype(tags)}(N, M, length(states), tags, states)
+    end
+
+    RBasis(N::IntOrVec, M::Int) = RBasis(vcat(vcat.([NBasis(i, M-1).eig_vecs for i in N:-1:0])...), N, M-1)
+end
 
 
 
@@ -150,4 +175,3 @@ function dense(state::State, B::T) where T <: AbstractBasis
     end
     dket
 end
-

@@ -2,6 +2,8 @@ export
 
     bath,
     bath2,
+    bath_exact,
+    bath2_exact,
     part_func
     
 
@@ -40,6 +42,25 @@ function bath(
     dot(half_bra,half_ket)
 end
 
+function bath_exact(
+    time1::T, time2::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State, rho; kwargs=()
+) where {S, T <: Real}
+    τ = -1im * time1
+    s = -1im * time2
+
+    #therm_ket = expv(-beta, H[2], state)
+    evol_bra = expv( τ, H[1], create(state, i))
+    half_bra = expv( -τ , H[2], destroy(State(evol_bra,H[1].basis), i))
+    
+    
+    half_ket = rho*dense(state, H[2].basis)
+
+    
+    
+    
+    dot(half_bra,half_ket)
+end
+
 
 function bath2(
     time1::T, time2::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State; kwargs=()
@@ -49,8 +70,12 @@ function bath2(
 
     #therm_ket = expv(-beta, H[2], state)
     evol_ket = expv((τ),H[2], state)
+    #print(State(evol_ket,H[2].basis))
+
+    
     
     a_i_ket= destroy(State(evol_ket,H[2].basis),i)
+    
                 
     half_ket = expv(-s ,H[3],a_i_ket)
 
@@ -62,7 +87,26 @@ function bath2(
     
     
     dot(half_bra, half_ket)
-end    
+end   
+
+function bath2_exact(
+    time1::T, time2::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State, rho; kwargs=()
+) where {S, T <: Real}
+    τ = -1im * time1
+    s = -1im * time2
+
+    #therm_ket = expv(-beta, H[2], state)
+    evol_bra = expv( τ, H[3], destroy(state,i) )
+    half_bra = expv( -τ , H[2], create(State(evol_bra,H[3].basis), i))
+    
+    
+    half_ket = rho*dense(state, H[2].basis)
+
+    
+    
+    
+    dot(half_bra,half_ket)
+end
 
 function part_func(
     beta::T, H::Vector{BoseHubbard{S}}; kwargs=()

@@ -36,7 +36,7 @@ function create(state::State{T}, i::Int) where T
     end
     K = findall(!iszero, vecs)
     kets = vecs[K]
-    State(state.coeff[K] .* sqrt.(getindex.(kets, i) .+ 1), kets)
+    State(state.coeff[K] .* sqrt.(getindex.(kets, i) ), kets)
 end
 
 """
