@@ -30,7 +30,7 @@ beta = 1.0
 
 T =eltype(J)
 struct RBoseHubbard{T <: Number}
-    basis::Union{Basis, NBasis, Vector{NBasis}, NplusBasis, RBasis}
+    basis::Union{Basis, NBasis, Vector{NBasis}, RBasis}
     lattice::LabelledGraph
     H::SparseMatrixCSC{T, Int64}
 end
@@ -78,8 +78,6 @@ end
 
 
 
-ket = [2,1]
-findfirst(x->x==)
 
 
 function partial_trace(init_dm, subsys_size)
@@ -128,7 +126,7 @@ function two_time_corr(
     trsum2 = 0
     
    
-    for i in 1:length(H[2].basis.dim)
+    for i in 1:length(H.basis.dim)
         
        
         
@@ -145,6 +143,7 @@ function two_time_corr(
 return corr_arr
 end
 
+get_index(RBasis(3,3),[2,1])
 
 
 @showprogress for U in [9.0]
@@ -171,19 +170,17 @@ end
     end 
     print(U)
     
-    """
+    
     filename1 = @sprintf("N_%d_L_%d_BH_0temp_U_%.1f_J_%.1f_t_%.1f_num_points_%.1f_Gamma1.npy", N, M, U, J, t_stop, num_points)
     filename2 = @sprintf("N_%d_L_%d_BH_0temp_U_%.1f_J_%.1f_t_%.1f_num_points_%.1f_Gamma2.npy", N, M, U, J, t_stop, num_points)
     np.save(filename1,twopt1)
     np.save(filename2,twopt2)
-    """
+    
 end    
 
-plot(times, real(twopt1))
+#plot(times, real(twopt1))
 
-H = BoseHubbard.([N+1, N, N-1,N-2], M, J, 4.0, :OBC)
-RBasis(3,3)
-H = BoseHubbard(RBasis(3,3), chain(2,4.0,4.0,:OBC))
+
 """
 using Plots
 plot(times, real(twopt1))
