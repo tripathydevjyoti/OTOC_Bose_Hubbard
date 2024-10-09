@@ -11,6 +11,7 @@ module ME_Bose_Hubbard
     using LinearAlgebra, MKL
     using DifferentialEquations
     using PyCall
+    using BlockDiagonals
     
 
 

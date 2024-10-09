@@ -5,7 +5,7 @@ export
 $(TYPEDSIGNATURES)
 """
 struct BoseHubbard{T <: Number}
-    basis::Union{Basis, NBasis, Vector{NBasis},NplusBasis,RBasis}
+    basis::Union{Basis, NBasis, Vector{NBasis},RBasis}
     lattice::LabelledGraph
     H::SparseMatrixCSC{T, Int64}
 end
@@ -27,18 +27,7 @@ function BoseHubbard{T}(B, lattice::LabelledGraph, dummy::Int) where T <: Number
     BoseHubbard{T}(B, lattice, H)
 end
 
-function BoseHubbard{T}(B, R, lattice::LabelledGraph) where T <: Number
-    dim_total = sum(B[i].dim for i in 1:length(B))
-    H = spzeros(T, dim_total, dim_total)
 
-    for i in 1:length(B)
-        Bi = B[i]
-        Hi = BoseHubbard{T}(Bi, lattice, 0).H
-        H[sum(B[j].dim for j in 1:i-1) .+ (1:Bi.dim), sum(B[j].dim for j in 1:i-1) .+ (1:Bi.dim)] = Hi
-    end
-
-    BoseHubbard{T}(R, lattice, H)
-end
 
 function BoseHubbard{T}(B, lattice::LabelledGraph) where T <: Number
     I, J, V = Int[], Int[], T[]

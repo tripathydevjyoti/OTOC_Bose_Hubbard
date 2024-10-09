@@ -4,7 +4,8 @@ export
     bath2,
     bath_exact,
     bath2_exact,
-    part_func
+    part_func,
+    expvfull
     
 
 """
@@ -17,6 +18,18 @@ function expv(τ::Number, ham::BoseHubbard{T}, v::State; kwargs=()) where T
     @assert info.converged == 1
     U_dket
 end
+"""
+$(TYPEDSIGNATURES)
+"""
+"""
+function expvfull(τ::Number, ham::Vector{SparseMatrixCSC{Float64, Int64}}, basis, v::State; kwargs=()) 
+    U_dket, info = exponentiate(
+        BlockDiagonal(ham), τ, dense(v, basis), ishermitian=true, tol=1E-8
+    )
+    @assert info.converged == 1
+    U_dket
+end
+"""
 
 """
 $(TYPEDSIGNATURES)
@@ -43,17 +56,17 @@ function bath(
 end
 
 function bath_exact(
-    time1::T, time2::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State, rho; kwargs=()
+    time1::T, time2::T, H::RBoseHubbard{S}, i::Int, j::Int, state::State, rho; kwargs=()
 ) where {S, T <: Real}
     τ = -1im * time1
     s = -1im * time2
 
     #therm_ket = expv(-beta, H[2], state)
-    evol_bra = expv( τ, H[1], create(state, i))
-    half_bra = expv( -τ , H[2], destroy(State(evol_bra,H[1].basis), i))
+    evol_bra = expv( τ, H, create(state, i))
+    half_bra = expv( -τ , H, destroy(State(evol_bra,H.basis), i))
     
     
-    half_ket = rho*dense(state, H[2].basis)
+    half_ket = rho*dense(state, H.basis)
 
     
     
@@ -90,17 +103,17 @@ function bath2(
 end   
 
 function bath2_exact(
-    time1::T, time2::T, H::Vector{BoseHubbard{S}}, i::Int, j::Int, state::State, rho; kwargs=()
+    time1::T, time2::T, H::RBoseHubbard{S}, i::Int, j::Int, state::State, rho; kwargs=()
 ) where {S, T <: Real}
     τ = -1im * time1
     s = -1im * time2
 
     #therm_ket = expv(-beta, H[2], state)
-    evol_bra = expv( τ, H[3], destroy(state,i) )
-    half_bra = expv( -τ , H[2], create(State(evol_bra,H[3].basis), i))
+    evol_bra = expv( τ, H, destroy(state,i) )
+    half_bra = expv( -τ , H, create(State(evol_bra,H.basis), i))
     
     
-    half_ket = rho*dense(state, H[2].basis)
+    half_ket = rho*dense(state, H.basis)
 
     
     

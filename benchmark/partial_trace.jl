@@ -14,54 +14,76 @@ using Combinatorics
 using Arpack
 using ProgressMeter
 using Printf
+using SparseArrays
+using BlockDiagonals
+using UnicodePlots
+using ExponentialUtilities
 
 
 
 
-
-N=3
-M=3
+N=4
+M=4
+U=9.0
 J = 4.0 #hopping paramter (float values only)
+beta = 1.0
 
-U = 4.0 
-H = BoseHubbard([NBasis(i,M-1) for i in N:-1:0], RBasis(N,M), chain(M-1,J,U,:OBC))
+T =eltype(J)
+struct RBoseHubbard{T <: Number}
+    basis::Union{Basis, NBasis, Vector{NBasis}, NplusBasis, RBasis}
+    lattice::LabelledGraph
+    H::SparseMatrixCSC{T, Int64}
+end
+
+# Outer constructor to infer T automatically
+function RBoseHubbard(N::Int, M::Int, J::T, U::T) where T <: Number
+    RH =BlockDiagonal([BoseHubbard(i, M-1, J, U, :OBC).H for i in N:-1:0] ) # Vector of Hamiltonians
+    RB = RBasis(N, M)  # Basis initialization
+    lattice = chain(M, J, U, :OBC)  # Lattice initialization
+    return RBoseHubbard{T}(RB, lattice, RH)  # Return an instance of RBoseHubbard
+end
+
+red_ham = RBoseHubbard(N,M,J,U)
 
 
-states = vcat(vcat.([NBasis(i,M-1).eig_vecs for i in N:-1:0])...)
-tag.(states)
 
 
 
-N=3
-M=3
-J = 4.0 #hopping paramter (float values only)
 
-U = 4.0      #on-site potential (float values only)
-         #no of sites and bosons in the chain
-beta = 1.0        #inverse temperature
-H = BoseHubbard(NRBasis(3,3), M, J, U, :OBC) #BH hamiltonian 
-eigenvals, eigenvecs = eigen(Matrix(H[2].H))
+
 #init_state = eigenvecs[:,1]
-init_state =dense( State([1.0],[[1,1,1,1,1,1]]), H[2].basis)
 
-init_dm = init_state * init_state'
+function thermal_dm(ham::RBoseHubbard{T}, beta::T) where T <: Number
+   
 
+    eigenvals, eigenvecs = eigen(Matrix(ham.H))
+    
+    exp_eigenvals = exp.(-beta * eigenvals)
 
+    Z = sum(exp_eigenvals)
+    
+    ρ = Diagonal(exp_eigenvals / Z)
+    return round.(eigenvecs*ρ*eigenvecs' , digits=10)
+    
 
-function expv(τ::Number, ham::BoseHubbard{T}, v::State; kwargs=()) where T
-    U_dket, info = exponentiate(
-        ham.H, τ, dense(v, ham.basis), ishermitian=true, tol=1E-8
-    )
-    @assert info.converged == 1
-    U_dket
 end
 
 
 
 
 
-function partial_trace(full_state, subsys_size)
-    init_dm = full_state * full_state'
+
+
+
+
+
+
+ket = [2,1]
+findfirst(x->x==)
+
+
+function partial_trace(init_dm, subsys_size)
+    
     r_dm = zeros(ComplexF64, subsys_size, subsys_size )
     for (i,_) in enumerate(1:subsys_size)
         for (j,_) in enumerate(1:subsys_size)
@@ -71,8 +93,8 @@ function partial_trace(full_state, subsys_size)
                     r_vec_i = deleteat!(NBasis(N,M).eig_vecs[i], 1)
                     r_vec_j = deleteat!(NBasis(N,M).eig_vecs[j], 1)
     
-                    index1 = findfirst(x -> x ==r_vec_i, RBasis(N,M-1).eig_vecs)
-                    index2 = findfirst(x -> x ==r_vec_j, RBasis(N,M-1).eig_vecs)
+                    index1 = findfirst(x -> x ==r_vec_i, RBasis(N,M).eig_vecs)
+                    index2 = findfirst(x -> x ==r_vec_j, RBasis(N,M).eig_vecs)
               
                     r_dm[index1, index2] = r_dm[index1, index2] + init_dm[i,j]
                 end    
@@ -95,28 +117,11 @@ function time_evolution(t, H, state)
     time_evol_state = expv(time, H, State(state, H.basis) )
 end    
 
-function renyi_entropy(den_mat)
-    -log(np.trace(den_mat*den_mat))
-end
 
-"""
-renyi_ent_2 = []
-for (_,t) in enumerate(times)
-    time_evol_state = time_evolution(t, H[2], init_state)
-    
-    time_evol_rdm = partial_trace(time_evol_state, subsys_size)
-    
-    time_evol_ree = renyi_entropy(time_evol_rdm)
-    
-    push!(renyi_ent_2, time_evol_ree)
-end    
 
-using Plots
-plot(times, renyi_ent_2)
-"""
 
 function two_time_corr(
-     H::Vector{BoseHubbard{S}},eigss,  time::T, rho;  kwargs=()
+     H::RBoseHubbard{S},eigss,  time::T, rho;  kwargs=()
     ) where{S, T <:Real}
     
     trsum1 = 0
@@ -127,10 +132,10 @@ function two_time_corr(
         
        
         
-        gamma1 = bath_exact(time, time, H, 1, 1, State(eigss[:,i] ,H[2].basis), rho )
+        gamma1 = bath_exact(time, time, H, 1, 1, State(eigss[:,i] ,H.basis), rho )
         trsum1 = trsum1 + gamma1 
 
-        gamma2 = bath2_exact(time, time, H, 1, 1, State(eigss[:,i], H[2].basis), rho)
+        gamma2 = bath2_exact(time, time, H, 1, 1, State(eigss[:,i], H.basis), rho)
         
         trsum2 = trsum2 + gamma2
        
@@ -142,41 +147,43 @@ end
 
 
 
-@showprogress for U in [0.0, 4.0, 8.0, 9.0, 9.5, 10.0, 16.0, 24.0, 40.0]
+@showprogress for U in [9.0]
         
-    H = BoseHubbard.([N+1, N, N-1,N-2], M, J, U, :OBC) #BH hamiltonian 
-    eigenvals, eigenvecs = eigen(Matrix(H[2].H))
-    init_state = eigenvecs[:,1]
+    #BH hamiltonian 
+    eigenvals, eigenvecs = eigen(Matrix(red_ham.H))
+    init_dm =thermal_dm(red_ham, beta)
     
-    #init_state =dense( State([1.0],[[1,1,1,1,1,1]]), H[2].basis)
-    subsys_size = H[2].basis.dim
+    
+    subsys_size = red_ham.basis.dim
     
     twopt1 =[] #array to store values for Γ1
     twopt2 =[] #array to store values for Γ2
-    R_BH1 = BoseHubbard(RBasis(N+1,M-1), chain(M-1, J, U, :OBC))
-    R_BH2 = BoseHubbard(RBasis(N,M-1), chain(M-1, J, U, :OBC))
-    R_BH3 = BoseHubbard(RBasis(N-1,M-1), chain(M-1, J, U, :OBC))
+  
 
     #eigenvals1, eigenvecs1 = eigen(Matrix(H[2].H))
     for (_, t) in enumerate(times)
-        time_evol_state = time_evolution(t, H[2], init_state)
-        time_evol_dm = partial_trace(time_evol_state * time_evol_state', subsys_size)
-        arr = two_time_corr( [R_BH1, R_BH2, R_BH3], eigenvecs, t, time_evol_dm)
+        τ = 1im*t
+        time_evol_dm = exponential!(τ*Matrix(red_ham.H))*init_dm*exponential!(-τ*Matrix(red_ham.H))
+        red_dm = partial_trace(time_evol_dm, subsys_size)
+        arr = two_time_corr( red_ham, eigenvecs, t, red_dm)
         push!(twopt1, arr[1])
         push!(twopt2, arr[2])
     end 
     print(U)
     
+    """
     filename1 = @sprintf("N_%d_L_%d_BH_0temp_U_%.1f_J_%.1f_t_%.1f_num_points_%.1f_Gamma1.npy", N, M, U, J, t_stop, num_points)
     filename2 = @sprintf("N_%d_L_%d_BH_0temp_U_%.1f_J_%.1f_t_%.1f_num_points_%.1f_Gamma2.npy", N, M, U, J, t_stop, num_points)
     np.save(filename1,twopt1)
     np.save(filename2,twopt2)
- 
+    """
 end    
 
 plot(times, real(twopt1))
 
-
+H = BoseHubbard.([N+1, N, N-1,N-2], M, J, 4.0, :OBC)
+RBasis(3,3)
+H = BoseHubbard(RBasis(3,3), chain(2,4.0,4.0,:OBC))
 """
 using Plots
 plot(times, real(twopt1))
