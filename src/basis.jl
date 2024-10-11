@@ -112,7 +112,9 @@ Base.eltype(state::State{T}) where {T} = T
 """
 $(TYPEDSIGNATURES)
 """
-@inline get_index(B::T, ket::Vector{Int}) where T <: AbstractBasis = searchsortedfirst(B.tags, tag(ket))
+@inline get_index(B::Union{NBasis, Basis}, ket::Vector{Int})  = searchsortedfirst(B.tags, tag(ket))
+@inline get_index(B::RBasis, ket::Vector{Int64}) = findfirst(x ->x ==tag(ket), B.tags)
+
 
 
 

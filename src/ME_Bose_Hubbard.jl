@@ -24,6 +24,7 @@ module ME_Bose_Hubbard
     include("hamiltonian.jl")
     include("bath.jl")
     include("dissipator.jl")
+    include("correlators.jl")
    
 
     

@@ -4,14 +4,15 @@ export
     bath2,
     bath_exact,
     bath2_exact,
-    part_func,
-    expvfull
+    part_func
+    
     
 
 """
 $(TYPEDSIGNATURES)
 """
-function expv(τ::Number, ham::BoseHubbard{T}, v::State; kwargs=()) where T
+
+function expv(τ::Number, ham::Union{BoseHubbard{T},RBoseHubbard{T}}, v::State; kwargs=()) where T
     U_dket, info = exponentiate(
         ham.H, τ, dense(v, ham.basis), ishermitian=true, tol=1E-8
     )
@@ -20,15 +21,6 @@ function expv(τ::Number, ham::BoseHubbard{T}, v::State; kwargs=()) where T
 end
 """
 $(TYPEDSIGNATURES)
-"""
-"""
-function expvfull(τ::Number, ham::Vector{SparseMatrixCSC{Float64, Int64}}, basis, v::State; kwargs=()) 
-    U_dket, info = exponentiate(
-        BlockDiagonal(ham), τ, dense(v, basis), ishermitian=true, tol=1E-8
-    )
-    @assert info.converged == 1
-    U_dket
-end
 """
 
 """
@@ -41,32 +33,33 @@ function bath(
     τ = -1im * time1
     s = -1im * time2
 
-    #therm_ket = expv(-beta, H[2], state)
-    evol_ket = expv((τ), H[2], state)
-    half_ket = expv(-s , H[1], create(State(evol_ket,H[2].basis), i))
-    
-    evol_bra = expv( (τ- s), H[2],state)
+#therm_ket = expv(-beta, H[2], state)
+    evol_bra = expv( s, H[2], state)
+    half_bra = dense(create( State(evol_bra, H[2].basis), j), H[1].basis)
 
-    half_bra = dense(create(State(evol_bra,H[2].basis),j), H[1].basis)    
 
     
-    
+    evol_ket = expv(τ, H[2], state)
+    half_ket = expv(-(τ-s), H[1], create(State(evol_ket, H[2].basis),i)), H[1].basis
     
     dot(half_bra,half_ket)
+   
 end
 
 function bath_exact(
-    time1::T, time2::T, H::RBoseHubbard{S}, i::Int, j::Int, state::State, rho; kwargs=()
+    time1::T, time2::T, H::Vector{RBoseHubbard{S}}, i::Int, j::Int, state::State, rho; kwargs=()
 ) where {S, T <: Real}
     τ = -1im * time1
     s = -1im * time2
 
     #therm_ket = expv(-beta, H[2], state)
-    evol_bra = expv( τ, H, create(state, i))
-    half_bra = expv( -τ , H, destroy(State(evol_bra,H.basis), i))
+    evol_bra = expv( s, H[2], state)
+    half_bra = dense(create( State(evol_bra, H[2].basis), j), H[1].basis)
     
     
-    half_ket = rho*dense(state, H.basis)
+    ket = rho*dense(state, H[2].basis)
+    evol_ket = expv(τ, H[2], State(ket, H[2].basis))
+    half_ket = expv(-(τ-s), H[1], create(State(evol_ket, H[2].basis),i))
 
     
     
@@ -81,44 +74,41 @@ function bath2(
     τ = -1im * time1
     s = -1im * time2
 
-    #therm_ket = expv(-beta, H[2], state)
-    evol_ket = expv((τ),H[2], state)
-    #print(State(evol_ket,H[2].basis))
+#therm_ket = expv(-beta, H[2], state)
+    evol_bra = expv( s, H[2], state)
+    half_bra = dense(destroy( State(evol_bra, H[2].basis), j), H[3].basis)
+
 
     
-    
-    a_i_ket= destroy(State(evol_ket,H[2].basis),i)
-    
-                
-    half_ket = expv(-s ,H[3],a_i_ket)
+    evol_ket = expv(τ, H[2], State(state, H[2].basis))
+    half_ket = expv(-(τ-s), H[3], destroy(State(evol_ket, H[2].basis),i))
 
-    #U_ai_ket = dense(State(expv(-(τ-s), H[2], create(State(state_temp,H[3].basis), j)),H[2].basis), H[2].basis)
-   
-    evol_bra = expv( (τ-s) ,H[2],state)
-    half_bra = dense(destroy(State(evol_bra,H[2].basis),j),  H[3].basis)
-    
-    
-    
-    dot(half_bra, half_ket)
+
+
+
+dot(half_bra,half_ket)
 end   
 
 function bath2_exact(
-    time1::T, time2::T, H::RBoseHubbard{S}, i::Int, j::Int, state::State, rho; kwargs=()
+    time1::T, time2::T, H::Vector{RBoseHubbard{S}}, i::Int, j::Int, state::State, rho; kwargs=()
 ) where {S, T <: Real}
     τ = -1im * time1
     s = -1im * time2
 
-    #therm_ket = expv(-beta, H[2], state)
-    evol_bra = expv( τ, H, destroy(state,i) )
-    half_bra = expv( -τ , H, create(State(evol_bra,H.basis), i))
-    
-    
-    half_ket = rho*dense(state, H.basis)
+#therm_ket = expv(-beta, H[2], state)
+    evol_bra = expv( s, H[2], state)
+    half_bra = dense(destroy( State(evol_bra, H[2].basis), j), H[2].basis)
 
-    
-    
-    
-    dot(half_bra,half_ket)
+
+    ket = rho*dense(state, H[2].basis)
+    evol_ket = expv(τ, H[2], State(ket, H[2].basis))
+    half_ket = expv(-(τ-s), H[2], destroy(State(evol_ket, H[2].basis),i))
+
+
+
+
+dot(half_bra,half_ket)
+
 end
 
 function part_func(
