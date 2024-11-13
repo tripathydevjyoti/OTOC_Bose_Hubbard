@@ -32,7 +32,7 @@ N=3
 M=3
 J = 4.0 #hopping paramter (float values only)
 beta = 1.0
-
+U=8.0
 T =eltype(J)
 np = pyimport("numpy")
 
@@ -40,20 +40,36 @@ t_stop = 40.0
 num_points = 200
 times = np.linspace(0, t_stop, num_points)
 
+using ExponentialUtilities
+
+
+function time_evol_rho(t, rho, H)
+    τ = -1im*t
+    mat = Matrix(h.H)
+    U_t = exponential!(τ*mat)
+    U_t_dag = conj(U_t)
+    return U_t*rho*U_t_dag
+
+end
+
+red_ham = [RBoseHubbard(N+1,M,J,U), RBoseHubbard(N,M,J,U)] 
+time_evol_rho(1.0, thermal_dm, h)
 @showprogress for U in [4.0]
         
-    red_ham = [RBoseHubbard(N+1,M,J,U), RBoseHubbard(N,M,J,U)]
-    eigenvals, eigenvecs = eigen(Matrix(red_ham[2].H))
-    init_dm =thermal_dm(red_ham[2], beta)
+    h = BoseHubbard(N,M,J,U,:OBC)
+    red_ham = [RBoseHubbard(N+1,M,J,U), RBoseHubbard(N,M,J,U)] 
+    rho_beta = exponential!(-beta*Matrix(h.H))
+    z = tr(exponential!(-beta*Matrix(h.H)))
+    thermal_dm = rho_beta/z
     
-    subsys_size = red_ham[2].basis.dim
+    subsys_size = h.basis.dim
     
     twopt1 =[] #array to store values for Γ1
     twopt2 =[] #array to store values for Γ2
   
     for (_, t) in enumerate(times)
-        τ = 1im*t
-        time_evol_dm = exponential!(τ*Matrix(red_ham[2].H))*init_dm*exponential!(-τ*Matrix(red_ham[2].H))
+        
+        time_evol_dm = time_evol_rho(t,thermal_dm,h)
         red_dm = partial_trace(time_evol_dm, subsys_size,N,M)
         arr = two_time_corr( red_ham, eigenvecs, t, red_dm)
         push!(twopt1, arr[1])

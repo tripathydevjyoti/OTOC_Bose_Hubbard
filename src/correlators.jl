@@ -1,7 +1,8 @@
 export
    thermal_dm,
    partial_trace,
-   two_time_corr
+   two_time_corr,
+   thermal_corr
 
 """
 $(TYPEDSIGNATURES)
@@ -51,7 +52,31 @@ function partial_trace(init_dm, subsys_size,N,M)
          end        
     end 
     return r_dm 
-end    
+end  
+
+function thermal_corr(
+    beta::T, H::Vector{BoseHubbard{S}}, time::T, partition::T, eigenvals, eigenvecs;  kwargs=()
+    ) where{S, T <:Real}
+    
+    trsum1 = 0
+    trsum2 = 0
+    
+   
+    for (i, energy) in enumerate(eigenvals)
+        
+        gibbs = exp(-beta*energy)
+        
+        gamma1 = gibbs*bath(time, 0.0, H, 1, 1, State(eigenvecs[:, i], H[2].basis) )
+        trsum1 = trsum1 + gamma1 
+
+        gamma2 = gibbs*bath2(time,0.0, H, 1, 1, State(eigenvecs[:, i], H[2].basis) )
+        trsum2 = trsum2 + gamma2
+       
+    end
+    
+    corr_arr = [trsum1/ partition, trsum2/partition ] 
+return corr_arr
+end
 
 
 function two_time_corr(
@@ -79,9 +104,11 @@ function two_time_corr(
 return corr_arr
 end
 
+"""
 function two_time_corr(
 H::Vector{RBoseHubbard{S}},eigss,  time::T, rho;  kwargs=()
   ) where{S, T <:Real}
   two_time = [time, 0]
   two_time_corr(H, eigss, two_time,rho)
 end   
+"""

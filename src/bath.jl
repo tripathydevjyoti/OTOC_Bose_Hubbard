@@ -4,7 +4,8 @@ export
     bath2,
     bath_exact,
     bath2_exact,
-    part_func
+    part_func,
+    expv
     
     
 
@@ -36,11 +37,13 @@ function bath(
 #therm_ket = expv(-beta, H[2], state)
     evol_bra = expv( s, H[2], state)
     half_bra = dense(create( State(evol_bra, H[2].basis), j), H[1].basis)
+    
 
 
     
     evol_ket = expv(τ, H[2], state)
-    half_ket = expv(-(τ-s), H[1], create(State(evol_ket, H[2].basis),i)), H[1].basis
+    half_ket = expv(-(τ-s), H[1], create(State(evol_ket, H[2].basis),i))
+    
     
     dot(half_bra,half_ket)
    
@@ -76,11 +79,12 @@ function bath2(
 
 #therm_ket = expv(-beta, H[2], state)
     evol_bra = expv( s, H[2], state)
+    print(evol_bra)
     half_bra = dense(destroy( State(evol_bra, H[2].basis), j), H[3].basis)
 
 
     
-    evol_ket = expv(τ, H[2], State(state, H[2].basis))
+    evol_ket = expv(τ, H[2], state)
     half_ket = expv(-(τ-s), H[3], destroy(State(evol_ket, H[2].basis),i))
 
 
