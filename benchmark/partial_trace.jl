@@ -16,12 +16,7 @@ using ProgressMeter
 using Printf
 using SparseArrays
 using BlockDiagonals
-using UnicodePlots
 using ExponentialUtilities
-
-
-
-using QuantumOptics
 using LogExpFunctions
 
 
@@ -39,7 +34,37 @@ np = pyimport("numpy")
 t_stop = 40.0
 num_points = 200
 times = np.linspace(0, t_stop, num_points)
+red_ham = [RBoseHubbard(N+1,M,J,U), RBoseHubbard(N,M,J,U)] 
 
+tensor_basis(N,M)
+
+function thermal_state(beta::T, ham::RBoseHubbard{T}) where T<:Real
+    thermal_mat = sparse(exponential!(Matrix(-beta*ham.H)))
+    part_func = tr(thermal_mat)
+
+    return thermal_mat/part_func
+end
+
+
+sys_basis = RBasis(N,2).eig_vecs
+bath_basis = RBasis(N,M).eig_vecs
+products  = collect.(Iterators.product(sys_basis,bath_basis))
+
+states = vec(np.array([vcat(p...) for p in products].tranpose())
+
+tensor_basis(N,M)
+       
+
+
+
+
+
+
+ 
+
+
+
+"""
 using ExponentialUtilities
 
 
@@ -84,6 +109,8 @@ time_evol_rho(1.0, thermal_dm, h)
     #np.save(filename2,twopt2)
     
 end    
+
+"""
 
 #twopt1 = np.load("N_5_L_5_BH_0temp_U_8.0_J_4.0_t_40.0_num_points_200.0_Gamma1.npy")
 #using Plots

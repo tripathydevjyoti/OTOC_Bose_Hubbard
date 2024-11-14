@@ -8,7 +8,7 @@ module ME_Bose_Hubbard
     using SparseArrays
     using Combinatorics
     using DocStringExtensions
-    using LinearAlgebra, MKL
+    using LinearAlgebra
     using DifferentialEquations
     using PyCall
     using BlockDiagonals

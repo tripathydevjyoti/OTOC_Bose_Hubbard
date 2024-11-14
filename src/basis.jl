@@ -4,6 +4,8 @@ export
     State,
     get_index,
     RBasis,
+    tensor_basis,
+    limit_tensor_basis,
     dense
 
 abstract type AbstractBasis end
@@ -14,6 +16,7 @@ const IntOrVec = Union{Int, Vector{Int}}
 $(TYPEDSIGNATURES)
 """
 tag(v::Vector{T}) where T = hash(v)
+tag(v) = hash(v)
 
 """
 $(TYPEDSIGNATURES)
@@ -86,6 +89,47 @@ struct RBasis{T, S} <: AbstractBasis
     end
 
     RBasis(N::IntOrVec, M::Int) = RBasis(vcat(vcat.([NBasis(i, M-1).eig_vecs for i in N:-1:0])...), N, M-1)
+end
+
+"""
+$(TYPEDSIGNATURES)
+"""
+
+struct tensor_basis{T, S} <: AbstractBasis
+    N::Union{T, Vector{T}}
+    M::T
+    dim::T
+    tags::Vector{S}
+    eig_vecs::Vector{Vector{T}}
+
+    function tensor_basis(states, N::IntOrVec, M::Int)
+        tags = tag.(states)
+
+        new{Int, eltype(tags)}(N, M, length(states), tags, states)
+    end
+    
+    function tensor_basis(N::Int, M::Int)
+        sys_basis = RBasis(N,2).eig_vecs
+        bath_basis = RBasis(N,M).eig_vecs
+        products  = collect.(Iterators.product(sys_basis,bath_basis))
+        states = vec(transpose([vcat(p...) for p in products]))
+
+        return tensor_basis(states, N, M)
+
+    end
+
+    
+end 
+
+"""
+$(TYPEDSIGNATURES)
+"""
+function limit_tensor_basis(N::Int, M::Int)
+    og_states = tensor_basis(N,M).eig_vecs
+    filtered_states = filter(state -> sum(state) == N, og_states)
+
+# Return a new tensor_basis instance with the filtered states
+    return tensor_basis(filtered_states, N, M)
 end
 
 """
