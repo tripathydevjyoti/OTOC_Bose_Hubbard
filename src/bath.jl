@@ -60,7 +60,7 @@ function bath_exact(
     half_bra = dense(create( State(evol_bra, H[2].basis), j), H[1].basis)
     
     
-    ket = rho*dense(state, H[2].basis)
+    ket = Matrix(rho)*dense(state, H[2].basis)
     evol_ket = expv(τ, H[2], State(ket, H[2].basis))
     half_ket = expv(-(τ-s), H[1], create(State(evol_ket, H[2].basis),i))
 
@@ -104,7 +104,7 @@ function bath2_exact(
     half_bra = dense(destroy( State(evol_bra, H[2].basis), j), H[2].basis)
 
 
-    ket = rho*dense(state, H[2].basis)
+    ket = Matrix(rho)*dense(state, H[2].basis)
     evol_ket = expv(τ, H[2], State(ket, H[2].basis))
     half_ket = expv(-(τ-s), H[2], destroy(State(evol_ket, H[2].basis),i))
 

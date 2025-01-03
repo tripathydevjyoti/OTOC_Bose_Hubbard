@@ -27,25 +27,235 @@ N=3
 M=3
 J = 4.0 #hopping paramter (float values only)
 beta = 1.0
-U=8.0
+U = 9.0
 T =eltype(J)
 np = pyimport("numpy")
 
-t_stop = 40.0
-num_points = 200
+t_stop = 0.25
+num_points = 30
 times = np.linspace(0, t_stop, num_points)
 red_ham = [RBoseHubbard(N+1,M,J,U), RBoseHubbard(N,M,J,U)] 
 
-tensor_basis(N,M)
+hamil = BoseHubbard(N,M,J,U,:OBC).H
+eigvals, eigvecs = eigen!(Matrix(hamil))
+diff(sort(eigvals))
+function thermal_state(beta::T, N::Int, M::Int, J::T, U::T) where T<:Real
+    # Original Hamiltonian
+    ham = BoseHubbard(N-1, M-1, J, U, :OBC).H
 
-function thermal_state(beta::T, ham::RBoseHubbard{T}) where T<:Real
-    thermal_mat = sparse(exponential!(Matrix(-beta*ham.H)))
+# Compute the thermal density matrix for the Hamiltonian
+    thermal_mat = sparse(exponential!(Matrix(-beta * ham)))
     part_func = tr(thermal_mat)
+    thermal_dm = thermal_mat / part_func  # Normalize to get the density matrix
 
-    return thermal_mat/part_func
+# First block: Zero matrix of size NBasis(N, M-1)
+    first_block_dim = NBasis(N, M-1).dim
+    first_block = spzeros(first_block_dim, first_block_dim)  # Sparse zero matrix
+
+# Second block: The Hamiltonian
+    second_block = thermal_dm
+
+# Remaining zero blocks
+    zero_blocks = []
+    for i in (N-2):-1:0
+        dim = NBasis(i, M-1).dim  # Dimension of the current zero block
+        push!(zero_blocks, spzeros(dim, dim))  # Add sparse zero matrix of appropriate size
+    end
+
+    
+# Combine all blocks into a block diagonal matrix
+    blocks = [first_block, second_block, zero_blocks...]  # Concatenate all blocks
+    block_diag_matrix = BlockDiagonal(blocks)
+
+# Return the block diagonal matrix
+return block_diag_matrix
+
 end
 
 
+#print(thermal_state(beta, N, M, J, U))
+
+
+
+
+function limit_dm(rho::SparseMatrixCSC{T, Int64}, N::Int, M::Int) where T<:Number
+    spinfo = findnz(rho)
+
+    dims = NBasis(N,M).dim
+    limit_rho = zeros(dims, dims)
+    for (i,val) in enumerate(findnz(result_dm)[3])
+        
+        index1 = get_index(NBasis(N,M), tensor_basis(N,M).eig_vecs[spinfo[1][i]])
+        index2 = get_index(NBasis(N,M), tensor_basis(N,M).eig_vecs[spinfo[2][i]])
+        
+        limit_rho[index1, index2] = val
+    end
+    
+    
+    return sparse(limit_rho)
+end    
+
+
+
+function number_quench(N,M)
+    size = NBasis(N,M).dim
+    vecs = NBasis(N,M).eig_vecs
+    quench = zeros(size,size)
+    for (i, _) in enumerate(vecs)
+        for (j, state) in enumerate(vecs)
+            quench[i,j] = state[1]
+        end    
+    end
+
+    
+    sparse(quench)
+end
+
+function time_evol_state(rho::SparseMatrixCSC{T, Int64}, bh::BoseHubbard{T}, time::T) where T<: Number
+    τ = -1im*time
+    U = exponential!(Matrix(τ*bh.H))
+    U_dag = adjoint(U)
+
+    U*rho*U_dag
+
+end    
+
+function partial_trace_bath(init_dm, N, M)
+    
+    r_dm = zeros(ComplexF64, N+1, N+1 )
+    for (i,_) in enumerate(1:size(init_dm, 1))
+        for (j,_) in enumerate(1:size(init_dm, 2))
+            if init_dm[i,j] != 0
+                if NBasis(N,M).eig_vecs[i][2:end] == NBasis(N,M).eig_vecs[j][2:end]
+    
+                    index1 = NBasis(N,M).eig_vecs[i][1]+1
+                    index2 = NBasis(N,M).eig_vecs[j][1]+1
+                    r_dm[index1, index2] = r_dm[index1, index2] + init_dm[i,j]
+                end    
+ 
+             end
+         end        
+    end 
+    return sparse(r_dm) 
+end 
+
+function renyi_entropy(rho)
+    rho_sq = rho*rho
+    tr_rho_sq = real(tr(rho_sq))
+    
+    return -log(tr_rho_sq)
+
+end   
+
+
+
+D = zeros(T, N+1, N+1)
+D[N, N] = 1.0  # The first element is 1, rest are zeros
+
+    # Step 2: Get the thermal density matrix (assuming thermal_state is defined)
+thermal_dm = thermal_state(beta,N, M, J, U)
+
+    # Step 3: Take the tensor product of the density matrix and thermal density matrix
+result_dm = sparse(kron(D, thermal_dm)) 
+
+number_quench(N,M)
+number_quench_dag = SparseArrays.transpose(number_quench(N,M))
+result_dm
+limit_dm(result_dm,N,M)
+#init_state = number_quench(N,M)*limit_dm(result_dm,N,M)*number_quench_dag
+init_state = limit_dm(result_dm,N,M)
+#init_state = init_state/tr(init_state)
+print(tr(init_state))
+H = BoseHubbard(N, M, J, U , :OBC)
+
+rho_t = time_evol_state(init_state, H, 2.0 )
+
+renyi_ent_list =[]
+renyi_ent_list2=[]
+for (_,t) in enumerate(times)
+    rho_t = time_evol_state(init_state, H, t )
+    rho_B = partial_trace(rho_t, size(init_state,1),N,M)
+    rho_S = partial_trace_bath(rho_t, N, M)
+    println(size(rho_B))
+    push!(renyi_ent_list, renyi_entropy(rho_S))
+    push!(renyi_ent_list2, renyi_entropy(rho_B))
+end    
+
+
+bath_ham = RBoseHubbard.([N+1,N], M, J, U)
+eigenvals, eigenvecs = eigen!(Matrix(bath_ham[2].H))
+
+two_time_corr(bath_ham, eigenvecs , [2.0,0.0], thermal_dm)
+
+function create_annihilation_creation_descending(N::Int)
+    # Initialize (N+1)x(N+1) matrices
+    a = zeros(ComplexF64, N+1, N+1)  # Annihilation operator
+    adag = zeros(ComplexF64, N+1, N+1)  # Creation operator
+
+    # Populate the matrices
+    for n in 1:N
+        a[n+1, n] = sqrt(N - n + 1)  # a lowers |N-n+1⟩ to |N-n⟩
+        adag[n, n+1] = sqrt(N - n + 1)  # a† raises |N-n⟩ to |N-n+1⟩
+    end
+
+    return a, adag
+end
+
+
+a, adag = create_annihilation_creation_descending(N)
+
+function time_evol_jump(time,op)
+    τ =-1im*time
+    prop = exponential!(Matrix(τ*RBoseHubbard(N, 2, 0.0, U).H))
+    prop_dag = adjoint(prop)
+    evol_op = prop_dag*op*prop
+    norm(evol_op, Inf)
+end  
+
+function integrand(time1, time2, J)
+    bath =two_time_corr(bath_ham, eigenvecs , [time1, time2], thermal_dm)
+    norm1 = time_evol_jump(time1, adag)*time_evol_jump(time2, a)
+    norm2 = time_evol_jump(time1, a)*time_evol_jump(time2, adag)
+    term1 = (bath[1]+conj(bath[2]))*2*norm2
+    term2 = (conj(bath[1])+bath[2])*2*norm1
+
+    J*J*(term1+term2)
+end 
+
+function double_integral(t, J)
+    inner_integral(time1) = quadgk(time2 -> integrand(time1, time2, J), 0, time1)[1]
+    quadgk(inner_integral, 0, t)[1]
+end
+
+bound_list=[]
+for (_,t) in enumerate(times)
+    push!(bound_list, real(double_integral(t,J)))
+    print(t)
+
+end   
+bound_list
+plot(times, [exp.(-real(bound_list)), exp.(-renyi_ent_list)])
+
+plot(times, [real(bound_list),renyi_ent_list ])
+
+println("Annihilation Operator (a) in descending basis:")
+println(a)
+println("\nCreation Operator (a†) in descending basis:")
+println(adag)
+
+renyi_entropy(D)
+renyi_ent_list2
+renyi_ent_list
+plot(times, [renyi_ent_list, renyi_ent_list2])
+plot(times, exp.(-renyi_ent_list))
+
+eigen(Matrix(init_state)).values
+
+
+
+
+
+"""
 sys_basis = RBasis(N,2).eig_vecs
 bath_basis = RBasis(N,M).eig_vecs
 products  = collect.(Iterators.product(sys_basis,bath_basis))
@@ -53,7 +263,7 @@ products  = collect.(Iterators.product(sys_basis,bath_basis))
 states = vec(np.array([vcat(p...) for p in products].tranpose())
 
 tensor_basis(N,M)
-       
+"""     
 
 
 

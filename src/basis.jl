@@ -112,7 +112,9 @@ struct tensor_basis{T, S} <: AbstractBasis
         sys_basis = RBasis(N,2).eig_vecs
         bath_basis = RBasis(N,M).eig_vecs
         products  = collect.(Iterators.product(sys_basis,bath_basis))
-        states = vec(transpose([vcat(p...) for p in products]))
+        #states = vec(transpose([vcat(p...) for p in products]))
+        states = vec(permutedims([vcat(p...) for p in products]))
+       
 
         return tensor_basis(states, N, M)
 
