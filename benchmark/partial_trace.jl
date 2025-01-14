@@ -23,15 +23,15 @@ using LogExpFunctions
 
 
 
-N=3
-M=3
+N=4
+M=4
 J = 4.0 #hopping paramter (float values only)
 beta = 1.0
-U = 9.0
+U = 8.5
 T =eltype(J)
 np = pyimport("numpy")
 
-t_stop = 0.25
+t_stop = 0.5
 num_points = 30
 times = np.linspace(0, t_stop, num_points)
 red_ham = [RBoseHubbard(N+1,M,J,U), RBoseHubbard(N,M,J,U)] 
@@ -174,11 +174,11 @@ renyi_ent_list =[]
 renyi_ent_list2=[]
 for (_,t) in enumerate(times)
     rho_t = time_evol_state(init_state, H, t )
-    rho_B = partial_trace(rho_t, size(init_state,1),N,M)
+    #rho_B = partial_trace(rho_t, size(init_state,1),N,M)
     rho_S = partial_trace_bath(rho_t, N, M)
-    println(size(rho_B))
+    #println(size(rho_B))
     push!(renyi_ent_list, renyi_entropy(rho_S))
-    push!(renyi_ent_list2, renyi_entropy(rho_B))
+    #push!(renyi_ent_list2, renyi_entropy(rho_B))
 end    
 
 
@@ -204,7 +204,7 @@ end
 
 a, adag = create_annihilation_creation_descending(N)
 
-function time_evol_jump(time,op)
+function time_evol_jump_norm(time,op)
     τ =-1im*time
     prop = exponential!(Matrix(τ*RBoseHubbard(N, 2, 0.0, U).H))
     prop_dag = adjoint(prop)
@@ -212,8 +212,38 @@ function time_evol_jump(time,op)
     norm(evol_op, Inf)
 end  
 
-function integrand(time1, time2, J)
+function time_evol_jump(time,op)
+    τ =-1im*time
+    prop = exponential!(Matrix(τ*RBoseHubbard(N, 2, 0.0, U).H))
+    prop_dag = adjoint(prop)
+    evol_op = prop_dag*op*prop
+   
+end  
+
+function integrand_born(time1, time2, J)
+
     bath =two_time_corr(bath_ham, eigenvecs , [time1, time2], thermal_dm)
+    norm1 = time_evol_jump_norm(time1, adag)*time_evol_jump_norm(time2, a)
+    norm2 = time_evol_jump_norm(time1, a)*time_evol_jump_norm(time2, adag)
+    term1 = (bath[1]+conj(bath[2]))*2*norm2
+    term2 = (conj(bath[1])+bath[2])*2*norm1
+
+    J*J*(term1+term2)
+end 
+
+
+function double_integral_born(t, J)
+    inner_integral(time1) = quadgk(time2 -> integrand_born(time1, time2, J), 0, time1)[1]
+    quadgk(inner_integral, 0, t)[1]
+end
+
+function integrand(time1, time2, J)
+
+    rho_t = time_evol_state(init_state, H, time1 )
+    rho_B = partial_trace(rho_t, size(init_state,1),N,M)
+    bath =two_time_corr(bath_ham, eigenvecs , [time1, time2], rho_B)
+
+
     norm1 = time_evol_jump(time1, adag)*time_evol_jump(time2, a)
     norm2 = time_evol_jump(time1, a)*time_evol_jump(time2, adag)
     term1 = (bath[1]+conj(bath[2]))*2*norm2
@@ -227,16 +257,42 @@ function double_integral(t, J)
     quadgk(inner_integral, 0, t)[1]
 end
 
+
+
 bound_list=[]
+bound_list_born=[]
 for (_,t) in enumerate(times)
     push!(bound_list, real(double_integral(t,J)))
+    push!(bound_list_born, real(double_integral_born(t,J)))
     print(t)
 
 end   
 bound_list
-plot(times, [exp.(-real(bound_list)), exp.(-renyi_ent_list)])
+bound_list_born
+renyi_ent_list
+plot(times, [exp.(-real(bound_list)),exp.(-real(bound_list_born)), exp.(-renyi_ent_list)])
 
-plot(times, [real(bound_list),renyi_ent_list ])
+
+
+kron(a, adag)
+function liouv_superop(time1, time2, rhob, )
+    a_t1 = time_evol_jump(time1, a)
+    a_t2 = time_evol_jump(time2, a)
+    adag_t1 = time_evol_jump(time1, adag)
+    adag_t2 = time_evol_jump(time2, adag)
+
+    bath_corr = two_time_corr(bath_ham, eigenvecs, [time1, time2], rhob)
+    iden = zeros(N+1,N+1)
+    superop1 = (J*J)*( bath_corr[1] )*( kron(adag_t2,a_t1) - kron(iden, adag_t2*a_t1) )
+    superop2 = (J*J)*( conj(bath_corr[1]) )*( kron(adag_t1,a_t2) - kron(adag_t1*a_t2, iden))
+    superop3 = (J*J)*( bath_corr[2] )*( kron(a_t2,adag_t1) - kron(iden, a_t2*adag_t1) )
+    superop4 = (J*J)*( conj(bath_corr[2]) )*( kron(a_t1,adag_t2) - kron(a_t1*adag_t2, iden))
+
+    superop = superop1 + superop2 + superop3 + superop4
+    
+    
+    fin_superop = superop - adjoint(superop)
+end    
 
 println("Annihilation Operator (a) in descending basis:")
 println(a)
