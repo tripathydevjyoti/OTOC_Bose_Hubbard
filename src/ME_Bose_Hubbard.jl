@@ -12,6 +12,12 @@ module ME_Bose_Hubbard
     using DifferentialEquations
     using PyCall
     using BlockDiagonals
+    using Test
+    using QuadGK
+    using Arpack
+    using SparseArrays
+    using ExponentialUtilities
+    using LogExpFunctions
     
 
 
@@ -25,7 +31,7 @@ module ME_Bose_Hubbard
     include("bath.jl")
     include("dissipator.jl")
     include("correlators.jl")
-   
+    include("qsl.jl")
 
     
 
